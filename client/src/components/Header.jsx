@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogPanel,
@@ -13,53 +13,27 @@ import {
   PopoverPanel,
 } from "@headlessui/react";
 import {
-  ArrowPathIcon,
   Bars3Icon,
-  ChartPieIcon,
-  CursorArrowRaysIcon,
-  FingerPrintIcon,
-  SquaresPlusIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
-import {
   ChevronDownIcon,
-  PhoneIcon,
-  PlayCircleIcon,
+  XMarkIcon,
 } from "@heroicons/react/20/solid";
 
 import ecoders_logo from "../assets/ecoders_logo.png";
+import { useNavigate } from "react-router-dom";
 
-const products = [
-  {
-    name: "Analytics",
-    description: "Get a better understanding of your traffic",
-    href: "#",
-    icon: ChartPieIcon,
-  },
-  {
-    name: "Engagement",
-    description: "Speak directly to your customers",
-    href: "#",
-    icon: CursorArrowRaysIcon,
-  },
-  {
-    name: "Security",
-    description: "Your customers’ data will be safe and secure",
-    href: "#",
-    icon: FingerPrintIcon,
-  },
-  {
-    name: "Integrations",
-    description: "Connect with third-party tools",
-    href: "#",
-    icon: SquaresPlusIcon,
-  },
-  {
-    name: "Automations",
-    description: "Build strategic funnels that will convert",
-    href: "#",
-    icon: ArrowPathIcon,
-  },
+const navigation = [
+  { name: "Home", href: "/" },
+  { name: "About", href: "/about" },
+  { name: "Contact", href: "/contact" },
+  { name: "Blogs", href: "/blogs" },
+  { name: "Admin", href: "/admin-login" },
+  { name: "Teacher", href: "/teacher-login" },
+  { name: "Student", href: "/student-login" },
+];
+
+const authenticatedNavigation = [
+  { name: "Courses", href: "/courses" },
+  { name: "Exams", href: "/exams" },
 ];
 
 const courses = [
@@ -67,13 +41,11 @@ const courses = [
     name: "Course 1",
     description: "Description of Course 1",
     href: "#",
-    icon: ChartPieIcon,
   },
   {
     name: "Course 2",
     description: "Description of Course 2",
     href: "#",
-    icon: CursorArrowRaysIcon,
   },
   // Add more courses as needed
 ];
@@ -83,29 +55,55 @@ const exams = [
     name: "Exam 1",
     description: "Details about Exam 1",
     href: "#",
-    icon: FingerPrintIcon,
   },
   {
     name: "Exam 2",
     description: "Details about Exam 2",
     href: "#",
-    icon: SquaresPlusIcon,
   },
   // Add more exams as needed
 ];
 
-const callsToAction = [
-  { name: "Watch demo", href: "#", icon: PlayCircleIcon },
-  { name: "Contact sales", href: "#", icon: PhoneIcon },
-];
-
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(true); // Mocked login status
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Example check for user authentication status
+    const user = localStorage.getItem("user");
+    setIsLoggedIn(!!user);
+
+    // Redirect to homepage if user is not logged in and tries to access restricted pages
+    if (!user) {
+      const restrictedPaths = [
+        "/courses",
+        "/exams",
+        "/profile",
+        "/admin-dashboard",
+        "/teacher-dashboard",
+        "/student-dashboard",
+      ];
+      if (restrictedPaths.includes(window.location.pathname)) {
+        navigate("/");
+        alert("Please log in to access this page.");
+      }
+    }
+  }, [navigate]);
 
   const handleLogout = () => {
-    // Perform logout operation
+    // Clear user data and update state
+    localStorage.removeItem("user");
     setIsLoggedIn(false);
+    navigate("/");
+  };
+
+  const getUserRoleLink = () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user.role === "admin") return "/admin-dashboard";
+    if (user.role === "teacher") return "/teacher-dashboard";
+    if (user.role === "student") return "/student-dashboard";
+    return "/";
   };
 
   return (
@@ -132,117 +130,33 @@ export default function Header() {
           </button>
         </div>
         <PopoverGroup className="hidden lg:flex lg:gap-x-12">
-          <a href="/" className="text-sm font-semibold leading-6 text-gray-900">
-            Home
-          </a>
-          <a
-            href="/about"
-            className="text-sm font-semibold leading-6 text-gray-900"
-          >
-            About
-          </a>
-          <a
-            href="/contact"
-            className="text-sm font-semibold leading-6 text-gray-900"
-          >
-            Contact
-          </a>
-
-          {/* Courses Dropdown */}
-          <Popover className="relative">
-            <PopoverButton className="flex items-center gap-x-1 text-sm font-semibold leading-6 text-gray-900">
-              Courses
-              <ChevronDownIcon
-                aria-hidden="true"
-                className="h-5 w-5 flex-none text-gray-400"
-              />
-            </PopoverButton>
-            <PopoverPanel className="absolute -left-8 top-full z-10 mt-3 w-screen max-w-md overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5">
-              <div className="p-4">
-                {courses.map((item) => (
-                  <div
-                    key={item.name}
-                    className="group relative flex items-center gap-x-6 rounded-lg p-4 text-sm leading-6 hover:bg-gray-50"
-                  >
-                    <div className="flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
-                      <item.icon
-                        aria-hidden="true"
-                        className="h-6 w-6 text-gray-600 group-hover:text-indigo-600"
-                      />
-                    </div>
-                    <div className="flex-auto">
-                      <a
-                        href={item.href}
-                        className="block font-semibold text-gray-900"
-                      >
-                        {item.name}
-                        <span className="absolute inset-0" />
-                      </a>
-                      <p className="mt-1 text-gray-600">{item.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </PopoverPanel>
-          </Popover>
-
-          {/* Exams Dropdown */}
-          <Popover className="relative">
-            <PopoverButton className="flex items-center gap-x-1 text-sm font-semibold leading-6 text-gray-900">
-              Exams
-              <ChevronDownIcon
-                aria-hidden="true"
-                className="h-5 w-5 flex-none text-gray-400"
-              />
-            </PopoverButton>
-            <PopoverPanel className="absolute -left-8 top-full z-10 mt-3 w-screen max-w-md overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5">
-              <div className="p-4">
-                {exams.map((item) => (
-                  <div
-                    key={item.name}
-                    className="group relative flex items-center gap-x-6 rounded-lg p-4 text-sm leading-6 hover:bg-gray-50"
-                  >
-                    <div className="flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
-                      <item.icon
-                        aria-hidden="true"
-                        className="h-6 w-6 text-gray-600 group-hover:text-indigo-600"
-                      />
-                    </div>
-                    <div className="flex-auto">
-                      <a
-                        href={item.href}
-                        className="block font-semibold text-gray-900"
-                      >
-                        {item.name}
-                        <span className="absolute inset-0" />
-                      </a>
-                      <p className="mt-1 text-gray-600">{item.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </PopoverPanel>
-          </Popover>
-
-          {/* Admin, Teacher, and Student Links */}
-          <a
-            href="/admin-login"
-            className="text-sm font-semibold leading-6 text-gray-900"
-          >
-            Admin
-          </a>
-          <a
-            href="/teacher-login"
-            className="text-sm font-semibold leading-6 text-gray-900"
-          >
-            Teacher
-          </a>
-          <a
-            href="/student-login"
-            className="text-sm font-semibold leading-6 text-gray-900"
-          >
-            Student
-          </a>
+          {navigation.map((item) => (
+            <a
+              key={item.name}
+              href={
+                item.name === "Admin" ||
+                item.name === "Teacher" ||
+                item.name === "Student"
+                  ? isLoggedIn
+                    ? getUserRoleLink()
+                    : item.href
+                  : item.href
+              }
+              className="text-sm font-semibold leading-6 text-gray-900"
+            >
+              {item.name}
+            </a>
+          ))}
+          {isLoggedIn &&
+            authenticatedNavigation.map((item) => (
+              <a
+                key={item.name}
+                href={item.href}
+                className="text-sm font-semibold leading-6 text-gray-900"
+              >
+                {item.name}
+              </a>
+            ))}
         </PopoverGroup>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
           {isLoggedIn ? (
@@ -257,7 +171,7 @@ export default function Header() {
               <PopoverPanel className="absolute right-0 z-10 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                 <div className="py-1">
                   <a
-                    href="#profile"
+                    href="/profile"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
                     Profile
@@ -273,7 +187,7 @@ export default function Header() {
             </Popover>
           ) : (
             <a
-              href="#login"
+              href="/login"
               className="text-sm font-semibold leading-6 text-gray-900"
             >
               Log in <span aria-hidden="true">&rarr;</span>
@@ -291,7 +205,7 @@ export default function Header() {
         <div className="fixed inset-0 z-10" />
         <DialogPanel className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
           <div className="flex items-center justify-between">
-            <a href="#" className="-m-1.5 p-1.5">
+            <a href="/" className="-m-1.5 p-1.5">
               <span className="sr-only">Your Company</span>
               <img
                 alt="Company Logo"
@@ -311,50 +225,75 @@ export default function Header() {
           <div className="mt-6 flow-root">
             <div className="-my-6 divide-y divide-gray-500/10">
               <div className="space-y-2 py-6">
-                <Disclosure as="div" className="-mx-3">
-                  <DisclosureButton className="group flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">
-                    Product
-                    <ChevronDownIcon
-                      aria-hidden="true"
-                      className="h-5 w-5 flex-none group-data-[open]:rotate-180"
-                    />
-                  </DisclosureButton>
-                  <DisclosurePanel className="mt-2 space-y-2">
-                    {[...products, ...callsToAction].map((item) => (
-                      <DisclosureButton
-                        key={item.name}
-                        as="a"
-                        href={item.href}
-                        className="block rounded-lg py-2 pl-6 pr-3 text-sm font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                      >
-                        {item.name}
+                {navigation.map((item) => (
+                  <a
+                    key={item.name}
+                    href={
+                      item.name === "Admin" ||
+                      item.name === "Teacher" ||
+                      item.name === "Student"
+                        ? isLoggedIn
+                          ? getUserRoleLink()
+                          : item.href
+                        : item.href
+                    }
+                    className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                  >
+                    {item.name}
+                  </a>
+                ))}
+                {isLoggedIn && (
+                  <>
+                    <Disclosure as="div" className="-mx-3">
+                      <DisclosureButton className="group flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">
+                        Courses
+                        <ChevronDownIcon
+                          aria-hidden="true"
+                          className="h-5 w-5 flex-none group-data-[open]:rotate-180"
+                        />
                       </DisclosureButton>
-                    ))}
-                  </DisclosurePanel>
-                </Disclosure>
-                <a
-                  href="#"
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                >
-                  Features
-                </a>
-                <a
-                  href="#"
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                >
-                  Marketplace
-                </a>
-                <a
-                  href="#"
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                >
-                  Company
-                </a>
+                      <DisclosurePanel className="mt-2 space-y-2">
+                        {courses.map((item) => (
+                          <DisclosureButton
+                            key={item.name}
+                            as="a"
+                            href={item.href}
+                            className="block rounded-lg py-2 pl-6 pr-3 text-sm font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                          >
+                            {item.name}
+                          </DisclosureButton>
+                        ))}
+                      </DisclosurePanel>
+                    </Disclosure>
+
+                    <Disclosure as="div" className="-mx-3">
+                      <DisclosureButton className="group flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">
+                        Exams
+                        <ChevronDownIcon
+                          aria-hidden="true"
+                          className="h-5 w-5 flex-none group-data-[open]:rotate-180"
+                        />
+                      </DisclosureButton>
+                      <DisclosurePanel className="mt-2 space-y-2">
+                        {exams.map((item) => (
+                          <DisclosureButton
+                            key={item.name}
+                            as="a"
+                            href={item.href}
+                            className="block rounded-lg py-2 pl-6 pr-3 text-sm font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                          >
+                            {item.name}
+                          </DisclosureButton>
+                        ))}
+                      </DisclosurePanel>
+                    </Disclosure>
+                  </>
+                )}
               </div>
               {isLoggedIn ? (
                 <div className="py-6">
                   <a
-                    href="#profile"
+                    href="/profile"
                     className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
                   >
                     Profile
@@ -369,7 +308,7 @@ export default function Header() {
               ) : (
                 <div className="py-6">
                   <a
-                    href="#login"
+                    href="/login"
                     className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
                   >
                     Log in

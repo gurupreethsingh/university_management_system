@@ -22,6 +22,10 @@ import Profile from "./pages/common_pages/Profile";
 import AllMessages from "./pages/contact_pages/AllMessages";
 import ReplyMessage from "./pages/contact_pages/ReplyMessage";
 import AllReplies from "./pages/contact_pages/AllReplies";
+import WorkWithUs from "./components/WorkWithUs";
+import NewsLetter from "./components/NewsLetter";
+import Footer from "./components/Footer";
+import AllBlogs from "./pages/blog_pages/AllBlogs";
 
 const App = () => (
   <Router>
@@ -32,6 +36,7 @@ const App = () => (
       <Route path="/contact" element={<Contact />} />
       <Route path="/about" element={<About />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/blogs" element={<AllBlogs />} />
 
       {/* admin routes */}
       <Route path="/admin-register" element={<AdminRegister />} />
@@ -66,6 +71,9 @@ const App = () => (
       <Route path="/page-not-found" element={<PageNotFound />} />
       <Route path="/*" element={<PageNotFound />} />
     </Routes>
+    <WorkWithUs />
+    <NewsLetter />
+    <Footer />
   </Router>
 );
 
