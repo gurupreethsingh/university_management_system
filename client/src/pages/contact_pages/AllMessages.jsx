@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import {
   FaThList,
   FaThLarge,
@@ -9,62 +10,73 @@ import {
   FaEnvelope,
   FaUser,
   FaClock,
+  FaSortAmountDown,
+  FaSortAmountUp,
 } from "react-icons/fa";
 
-const initialMessages = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john@example.com",
-    subject: "Inquiry about services",
-    message: "Can you tell me more about your services?",
-    timestamp: "2024-08-25 10:00 AM",
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    email: "jane@example.com",
-    subject: "Feedback on website",
-    message: "Your website is fantastic!",
-    timestamp: "2024-08-24 09:30 AM",
-  },
-  {
-    id: 3,
-    name: "Alice Johnson",
-    email: "alice@example.com",
-    subject: "Job Opportunity",
-    message: "I would like to apply for the job posted.",
-    timestamp: "2024-08-23 08:45 AM",
-  },
-  // Add more messages as needed
-];
-
-const itemsPerPage = 5;
+const itemsPerPage = 6;
 
 export default function MessagesList() {
   const [view, setView] = useState("list");
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredMessages, setFilteredMessages] = useState(
-    initialMessages.sort(
-      (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
-    )
-  );
+  const [messages, setMessages] = useState([]); // Store messages fetched from the server
+  const [filteredMessages, setFilteredMessages] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortOrder, setSortOrder] = useState("desc");
+
+  // Fetch messages from the server when the component mounts
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/all-messages");
+        const fetchedMessages = response.data;
+  
+        console.log(fetchedMessages); // Check the structure of the data here
+  
+        // Sort messages by timestamp, with the latest message first
+        const sortedMessages = fetchedMessages.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        
+        setMessages(sortedMessages);
+        setFilteredMessages(sortedMessages); // Initially, all messages are displayed
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+  
+    fetchMessages();
+  }, []);
 
   const handleSearch = (event) => {
     const value = event.target.value.toLowerCase();
     setSearchTerm(value);
-    const filtered = initialMessages
+    const filtered = messages
       .filter(
         (message) =>
-          message.name.toLowerCase().includes(value) ||
+          message.firstName.toLowerCase().includes(value) ||
+          message.lastName.toLowerCase().includes(value) ||
           message.email.toLowerCase().includes(value) ||
-          message.subject.toLowerCase().includes(value) ||
-          message.message.toLowerCase().includes(value)
+          message.message_text.toLowerCase().includes(value)
       )
-      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      .sort((a, b) =>
+        sortOrder === "desc"
+          ? new Date(b.createdAt) - new Date(a.createdAt)
+          : new Date(a.createdAt) - new Date(b.createdAt)
+      );
     setFilteredMessages(filtered);
     setCurrentPage(1); // Reset to first page after search
+  };
+
+  const toggleSortOrder = () => {
+    const newOrder = sortOrder === "desc" ? "asc" : "desc";
+    setSortOrder(newOrder);
+    const sortedMessages = [...filteredMessages].sort((a, b) =>
+      newOrder === "desc"
+        ? new Date(b.createdAt) - new Date(a.createdAt)
+        : new Date(a.createdAt) - new Date(b.createdAt)
+    );
+    setFilteredMessages(sortedMessages);
   };
 
   const totalPages = Math.ceil(filteredMessages.length / itemsPerPage);
@@ -93,6 +105,22 @@ export default function MessagesList() {
             onChange={handleSearch}
             className="w-64 rounded-md border border-gray-300 px-4 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           />
+          <button
+            onClick={toggleSortOrder}
+            className="flex items-center space-x-2 px-4 py-2 rounded-md text-white bg-indigo-600 hover:bg-indigo-500"
+          >
+            {sortOrder === "desc" ? (
+              <>
+                <FaSortAmountDown />
+                <span>Newest First</span>
+              </>
+            ) : (
+              <>
+                <FaSortAmountUp />
+                <span>Oldest First</span>
+              </>
+            )}
+          </button>
           <FaThList
             className={`cursor-pointer ${
               view === "list" ? "text-indigo-600" : "text-gray-500"
@@ -123,19 +151,18 @@ export default function MessagesList() {
             : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
         }`}
       >
-        {paginatedMessages.map((message) => (
-          <Link key={message.id} to={`/reply-message/${message.id}`}>
+        {paginatedMessages.map((eachmessage) => (
+          <Link key={eachmessage._id} to={`/reply-message/${eachmessage._id}`}>
             <div className="p-6 border rounded-lg shadow-sm hover:shadow-md transition-shadow bg-white">
               <h3 className="text-lg font-bold text-gray-700 flex items-center">
-                <FaEnvelope className="mr-2" /> {message.subject}
+                <FaEnvelope className="mr-2" /> {eachmessage.message_text}
               </h3>
               <p className="mt-2 text-sm text-gray-600 flex items-center">
-                <FaUser className="mr-2 text-blue-500" /> {message.name} (
-                {message.email})
+                <FaUser className="mr-2 text-blue-500" /> {eachmessage.firstName} {eachmessage.lastName} - (
+                {eachmessage.email})
               </p>
-              <p className="mt-2 text-sm text-gray-600">{message.message}</p>
               <p className="mt-2 text-sm text-gray-500 flex items-center">
-                <FaClock className="mr-2 text-green-500" /> {message.timestamp}
+                <FaClock className="mr-2 text-green-500" /> {eachmessage.createdAt}
               </p>
             </div>
           </Link>

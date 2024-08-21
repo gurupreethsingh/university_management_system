@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import axios from "axios";
 import {
   FaEnvelope,
   FaUser,
@@ -9,77 +10,70 @@ import {
   FaUserCircle,
 } from "react-icons/fa";
 
-const initialMessages = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john@example.com",
-    subject: "Inquiry about services",
-    message: "Can you tell me more about your services?",
-    timestamp: "2024-08-25 10:00 AM",
-    replies: [],
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    email: "jane@example.com",
-    subject: "Feedback on website",
-    message: "Your website is fantastic!",
-    timestamp: "2024-08-24 09:30 AM",
-    replies: [],
-  },
-  {
-    id: 3,
-    name: "Alice Johnson",
-    email: "alice@example.com",
-    subject: "Job Opportunity",
-    message: "I would like to apply for the job posted.",
-    timestamp: "2024-08-23 08:45 AM",
-    replies: [],
-  },
-  // Add more messages as needed
-];
-
-export default function ReplyMessage() {
+export default function ReplyMessage({ adminName, adminEmail }) { // Pass admin details as props
   const { id } = useParams();
-  const messageId = parseInt(id, 10);
-  const message = initialMessages.find((msg) => msg.id === messageId);
-
+  const [message, setMessage] = useState(null);
   const [reply, setReply] = useState("");
-  const [replies, setReplies] = useState(message.replies);
+  const [replies, setReplies] = useState([]);
 
-  const handleReply = () => {
+  // Fetch the message and its replies from the backend
+  useEffect(() => {
+    const fetchMessage = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/reply-message/${id}`);
+        setMessage(response.data);
+        setReplies(response.data.replies);
+      } catch (error) {
+        console.error("Error fetching message:", error);
+      }
+    };
+
+    fetchMessage();
+  }, [id]);
+
+  const handleReply = async () => {
     if (reply.trim() !== "") {
       const newReply = {
-        name: "Your Name", // Replace with your actual name
-        timestamp: new Date().toLocaleString(),
+        name: adminName, // Admin's name
+        email: adminEmail, // Admin's email
         message: reply,
       };
-      setReplies([...replies, newReply]);
-      setReply("");
+
+      try {
+        // Send the reply to the backend to store in the database
+        await axios.post(`http://localhost:5000/give-message-reply/${id}/reply`, newReply);
+        
+        // Update the replies list with the new reply
+        setReplies([...replies, { ...newReply, timestamp: new Date().toLocaleString() }]);
+        setReply("");
+      } catch (error) {
+        console.error("Error sending reply:", error);
+      }
     }
   };
+
+  if (!message) return <p>Loading...</p>;
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
       <div className="border-b pb-6 mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
           <FaEnvelope className="mr-2 text-indigo-600" />
-          {message.subject}
+          {message.message_text}
         </h2>
         <div className="flex items-center mb-2">
           <FaUser className="mr-2 text-blue-500" />
           <span className="text-sm text-gray-700">
-            {message.name} ({message.email})
+            {message.firstName} {message.lastName} ({message.email})
           </span>
         </div>
         <div className="flex items-center mb-4">
           <FaClock className="mr-2 text-green-500" />
-          <span className="text-sm text-gray-500">{message.timestamp}</span>
+          <span className="text-sm text-gray-500">{new Date(message.createdAt).toLocaleString()}</span>
         </div>
         <p className="text-gray-800 mb-6">
           <FaCommentDots className="mr-2 text-teal-500" />
-          {message.message}
+          {message.message_text}
         </p>
       </div>
 
@@ -103,7 +97,7 @@ export default function ReplyMessage() {
                 </span>
                 <span className="ml-4 text-sm text-gray-500">
                   <FaClock className="mr-1 text-green-500" />
-                  {reply.timestamp}
+                  {new Date(reply.timestamp).toLocaleString()}
                 </span>
               </div>
               <p className="text-gray-700 ml-6 pl-1 border-l-2 border-indigo-600">

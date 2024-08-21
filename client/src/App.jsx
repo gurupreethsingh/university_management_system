@@ -64,7 +64,7 @@ const App = () => (
       {/* contact and messages routes */}
       <Route path="/all-messages" element={<AllMessages />} />
       <Route path="/reply-message/:id" element={<ReplyMessage />} />
-      <Route path="/all-replies/" element={<AllReplies />} />
+      <Route path="/all-replies" element={<AllReplies />} />
 
       <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />

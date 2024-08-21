@@ -35,6 +35,32 @@ const initialReplies = [
     timestamp: "2024-08-23 09:00 AM",
   },
   // Add more replies as needed
+
+  {
+    id: 4,
+    question: "Can you tell me more about your services?",
+    answer:
+      "Yes, we offer a variety of services including web development and design.",
+    timestamp: "2024-08-25 10:15 AM",
+  },
+  {
+    id: 5,
+    question: "Your website is fantastic!",
+    answer: "Thank you for your feedback! We're glad you like it.",
+    timestamp: "2024-08-24 11:00 AM",
+  },
+  {
+    id: 6,
+    question: "I would like to apply for the job posted.",
+    answer: "Please send your resume to hr@example.com.",
+    timestamp: "2024-08-23 09:00 AM",
+  },
+  {
+  id: 7,
+  question: "I would like to apply for the job posted.",
+  answer: "Please send your resume to hr@example.com.",
+  timestamp: "2024-08-23 09:00 AM",
+},
 ];
 
 const itemsPerPage = 6;

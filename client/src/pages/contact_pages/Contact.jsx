@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";  // Import axios for HTTP requests
 import {
   FaUser,
-  FaBuilding,
   FaEnvelope,
   FaPhone,
   FaComment,
@@ -12,7 +13,50 @@ import {
 import { Switch } from "@headlessui/react";
 
 export default function Contact() {
-  const [agreed, setAgreed] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    message_text: '',
+    agreeToLicense: false,
+  });
+
+  const navigate = useNavigate();
+
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post('http://localhost:5000/add-contact-message', formData);
+      if (response.status === 201) {
+        setSubmitted(true);
+        alert('Message successfully sent! You will be notified, within 24 hours.');
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          message_text: '',
+          agreeToLicense: false,
+        });
+         navigate("/all-messages");
+      }
+    } catch (error) {
+      console.error('Error submitting contact message:', error);
+      alert('There was an issue submitting your message. Please try again.');
+    }
+  };
 
   return (
     <div className="isolate bg-white px-6 py-12 sm:py-24 lg:px-8">
@@ -20,30 +64,33 @@ export default function Contact() {
         {/* Google Map */}
         <div className="order-1 lg:order-none">
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.6862942264764!2d-122.4194160846814!3d37.77492927975925!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8085808c5f1d7b5f%3A0x34d002cbf0e57a39!2s123%20Main%20St%2C%20San%20Francisco%2C%20CA%2094122!5e0!3m2!1sen!2sus!4v1633034416534!5m2!1sen!2sus"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3886.7083202851363!2d77.50447077507788!3d13.054228987268758!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae23460634f221%3A0x2a27c0c9577a1841!2sEcoders!5e0!3m2!1sen!2sin!4v1724232609612!5m2!1sen!2sin"
             width="100%"
-            height="450"
+            height="300"
             style={{ border: 0 }}
             allowFullScreen=""
             loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            className="w-full h-64 sm:h-80 md:h-96"
             title="Google Map"
           ></iframe>
 
           {/* Company Address */}
           <div className="mt-8 text-center lg:text-left">
             <h3 className="text-lg font-bold text-gray-900">Our Address</h3>
-            <p className="mt-4 text-gray-600 flex items-center justify-center lg:justify-start">
-              <FaMapMarkerAlt className="mr-2 text-red-500" /> 123 Main Street,
-              San Francisco, CA 94122
+            <p className="mt-4 text-gray-600 flex flex-col lg:flex-row items-center justify-center lg:justify-start">
+              <FaMapMarkerAlt className="mr-2 text-red-500" />
+              Ecoders, 123 Main Street, Bangalore. Karnataka, 560073
             </p>
-            <p className="mt-1 text-gray-600 flex items-center justify-center lg:justify-start">
-              <FaPhone className="mr-2 text-yellow-500" /> +1 234 567 890
+            <p className="mt-1 text-gray-600 flex flex-col lg:flex-row items-center justify-center lg:justify-start">
+              <FaPhone className="mr-2 text-yellow-500" /> +91 9538596766
             </p>
-            <p className="mt-1 text-gray-600 flex items-center justify-center lg:justify-start">
-              <FaEnvelope className="mr-2 text-red-500" /> info@company.com
+            <p className="mt-1 text-gray-600 flex flex-col lg:flex-row items-center justify-center lg:justify-start">
+              <FaEnvelope className="mr-2 text-red-500" /> igurupreeth@gmail.com
             </p>
           </div>
         </div>
+
 
         {/* Contact Form */}
         <div className="order-2 lg:order-none space-y-8">
@@ -53,11 +100,11 @@ export default function Contact() {
             </h2>
           </div>
 
-          <form action="#" method="POST" className="mx-auto max-w-xl">
+          <form onSubmit={handleSubmit} className="mx-auto max-w-xl">
             <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
               <div className="relative">
                 <label
-                  htmlFor="first-name"
+                  htmlFor="firstName"
                   className="block text-sm font-semibold leading-6 text-gray-900"
                 >
                   First name
@@ -65,17 +112,19 @@ export default function Contact() {
                 <div className="mt-2.5 relative flex items-center">
                   <FaUser className="absolute left-3 text-blue-500" />
                   <input
-                    id="first-name"
-                    name="first-name"
+                    id="firstName"
+                    name="firstName"
                     type="text"
-                    autoComplete="given-name"
+                    value={formData.firstName}
+                    onChange={handleChange}
                     className="block w-full rounded-md border-0 pl-10 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    required
                   />
                 </div>
               </div>
               <div className="relative">
                 <label
-                  htmlFor="last-name"
+                  htmlFor="lastName"
                   className="block text-sm font-semibold leading-6 text-gray-900"
                 >
                   Last name
@@ -83,11 +132,13 @@ export default function Contact() {
                 <div className="mt-2.5 relative flex items-center">
                   <FaUser className="absolute left-3 text-green-500" />
                   <input
-                    id="last-name"
-                    name="last-name"
+                    id="lastName"
+                    name="lastName"
                     type="text"
-                    autoComplete="family-name"
+                    value={formData.lastName}
+                    onChange={handleChange}
                     className="block w-full rounded-md border-0 pl-10 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    required
                   />
                 </div>
               </div>
@@ -105,14 +156,16 @@ export default function Contact() {
                     id="email"
                     name="email"
                     type="email"
-                    autoComplete="email"
+                    value={formData.email}
+                    onChange={handleChange}
                     className="block w-full rounded-md border-0 pl-10 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    required
                   />
                 </div>
               </div>
               <div className="relative sm:col-span-2">
                 <label
-                  htmlFor="phone-number"
+                  htmlFor="phone"
                   className="block text-sm font-semibold leading-6 text-gray-900"
                 >
                   Phone number
@@ -120,11 +173,13 @@ export default function Contact() {
                 <div className="mt-2.5 relative flex items-center">
                   <FaPhone className="absolute left-3 text-yellow-500" />
                   <input
-                    id="phone-number"
-                    name="phone-number"
+                    id="phone"
+                    name="phone"
                     type="tel"
-                    autoComplete="tel"
+                    value={formData.phone}
+                    onChange={handleChange}
                     className="block w-full rounded-md border-0 pl-10 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    required
                   />
                 </div>
               </div>
@@ -138,19 +193,23 @@ export default function Contact() {
                 <div className="mt-2.5 relative flex items-center">
                   <FaComment className="absolute left-3 text-teal-500" />
                   <textarea
-                    id="message"
-                    name="message"
+                    id="message_text"
+                    name="message_text"
                     rows={4}
+                    value={formData.message_text}
+                    onChange={handleChange}
                     className="block w-full rounded-md border-0 pl-10 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    defaultValue={""}
+                    required
                   />
                 </div>
               </div>
               <div className="flex gap-x-4 sm:col-span-2">
                 <div className="flex h-6 items-center">
                   <Switch
-                    checked={agreed}
-                    onChange={setAgreed}
+                    checked={formData.agreeToLicense}
+                    onChange={(checked) =>
+                      setFormData({ ...formData, agreeToLicense: checked })
+                    }
                     className="group flex w-8 flex-none cursor-pointer rounded-full bg-gray-200 p-px ring-1 ring-inset ring-gray-900/5 transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 data-[checked]:bg-indigo-600"
                   >
                     <span className="sr-only">Agree to policies</span>
