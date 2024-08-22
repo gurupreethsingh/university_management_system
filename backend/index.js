@@ -103,6 +103,8 @@ app.post('/give-message-reply/:id/reply', async (req, res) => {
 });
 
 
+const Admin = require('./models/AdminModel');
+
 
 // admin register route
 // Body parser middleware
@@ -169,7 +171,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-app.post("/admin-register", upload.fields([{ name: 'admin_image' }, { name: 'admin_cover_image' }]), async (req, res) => {
+app.post("/admin-register",  async (req, res) => {
     try {
       const {
         name,
@@ -181,13 +183,11 @@ app.post("/admin-register", upload.fields([{ name: 'admin_image' }, { name: 'adm
       const hashedPassword = await bcrypt.hash(password, 10);
   
       // Create a new admin user with the required fields and optional images
-      const user = new Employee({
+      const user = new Admin({
         name,
         email,
         password: hashedPassword,
         role: "admin",
-        admin_image: req.files['admin_image'] ? `admins/${req.files['admin_image'][0].filename}` : null, // Store relative path for admin_image
-        admin_cover_image: req.files['admin_cover_image'] ? `admins/${req.files['admin_cover_image'][0].filename}` : null, // Store relative path for admin_cover_image
       });
   
       // Save the user to the database
@@ -200,20 +200,17 @@ app.post("/admin-register", upload.fields([{ name: 'admin_image' }, { name: 'adm
 });
 
   
-  // Route to Login a User (Customer or Employee)
-  app.post("/login", async (req, res) => {
+  // Route to Login a admin
+  app.post("/admin-login", async (req, res) => {
     try {
       const { email, password } = req.body;
-      let user =
-        (await Customer.findOne({ email })) ||
-        (await Employee.findOne({ email }));
   
-      if (!user) {
-        return res.status(400).json({ error: "User not found" });
+      const admin = await Admin.findOne({ email });
+      if (!admin) {
+        return res.status(400).json({ error: "Invalid credentials" });
       }
   
-      const isMatch = await bcrypt.compare(password, user.password);
-  
+      const isMatch = await bcrypt.compare(password, admin.password);
       if (!isMatch) {
         return res.status(400).json({ error: "Invalid credentials" });
       }
@@ -221,9 +218,9 @@ app.post("/admin-register", upload.fields([{ name: 'admin_image' }, { name: 'adm
       // Generate JWT token
       const token = jwt.sign(
         {
-          id: user._id,
-          email: user.email,
-          userType: user instanceof Customer ? "customer" : "employee",
+          id: admin._id,
+          email: admin.email,
+          userType: "admin",
         },
         JWT_SECRET,
         { expiresIn: "1h" }
@@ -232,17 +229,16 @@ app.post("/admin-register", upload.fields([{ name: 'admin_image' }, { name: 'adm
       res.status(200).json({
         message: "Logged in successfully!",
         token,
-        first_name: user.first_name,
-        department: user.department,
-        position: user.position,
-        employee_image: user.employee_image || user.customer_image || null,
+        name: admin.name,
+        email: admin.email
       });
     } catch (error) {
-      console.error("Error logging in user:", error);
-      res.status(500).json({ error: "Failed to log in user" });
+      console.error("Error logging in admin:", error);
+      res.status(500).json({ error: "Failed to log in admin" });
     }
   });
   
+
   // Middleware to authenticate using JWT
   const authenticate = (req, res, next) => {
     const token = req.header("Authorization").replace("Bearer ", "");

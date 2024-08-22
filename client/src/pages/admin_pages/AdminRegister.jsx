@@ -12,20 +12,25 @@ export default function AdminRegister() {
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
+  // Name validation
   const validateName = (name) => {
     return name.trim() !== '' && !/^\s+$/.test(name);
   };
 
+  // Email validation
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email) && !/\s/.test(email);
   };
 
+  // Password validation with your provided regex
   const validatePassword = (password) => {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
-    return passwordRegex.test(password) && !/\s/.test(password);
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[^\s]{8,}$/;
+    return passwordRegex.test(password) && !/\s/.test(password); // No spaces allowed
   };
 
+  // Form submission handler
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -40,12 +45,14 @@ export default function AdminRegister() {
     }
 
     if (!validatePassword(password)) {
-      setError('Password must be at least 6 characters long, with one lowercase, one uppercase, one number, and one special character. No spaces are allowed.');
+      setError(
+        'Password must be at least 8 characters long, with one lowercase, one uppercase, one number, and one special character. No spaces are allowed.'
+      );
       return;
     }
 
     try {
-      const response = await axios.post('/admin-register', {
+      const response = await axios.post('http://localhost:5000/admin-register', {
         name,
         email,
         password,
@@ -63,7 +70,6 @@ export default function AdminRegister() {
     } catch (err) {
       setError('Registration failed. Please try again.');
       setSuccess('');
-      navigate("/admin-register");
     }
   };
 

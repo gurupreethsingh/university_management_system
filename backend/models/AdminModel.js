@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const AdminSchema = new mongoose.Schema({
   name: {
@@ -43,6 +43,9 @@ const AdminSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+
+  role : {type : String, default : "admin"},
+  
   roles: {
     createTeacher: {
       type: Boolean,
