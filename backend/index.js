@@ -13,6 +13,7 @@ const path = require("path");
 const Admin = require("./models/AdminModel"); // Your admin model
 const Teacher = require("./models/TeacherModel");
 const Student = require("./models/StudentModel");
+const Event = require("./models/EventModel");
 const auth = require("./middleware/auth");
 
 // Load environment variables from .env file
@@ -385,6 +386,83 @@ app.get("/profile", auth, async (req, res) => {
   } catch (error) {
     console.error(error.message);
     res.status(500).send("Server error");
+  }
+});
+
+// function to count all the user counts
+
+// Route to get counts of various entities
+app.get("/admin-dashboard/counts", async (req, res) => {
+  try {
+    console.log("Counts route hit");
+
+    const totalAdmins = await Admin.countDocuments();
+    console.log("Total Admins:", totalAdmins);
+
+    const totalTeachers = await Teacher.countDocuments();
+    console.log("Total Teachers:", totalTeachers);
+
+    const totalStudents = await Student.countDocuments();
+    console.log("Total Students:", totalStudents);
+
+    const totalEvents = await Event.countDocuments();
+    console.log("Total Events:", totalEvents);
+
+    const totalUsers = totalAdmins + totalTeachers + totalStudents;
+    console.log("Total Users:", totalUsers);
+
+    res.json({
+      totalUsers,
+      totalAdmins,
+      totalTeachers,
+      totalStudents,
+      totalEvents,
+    });
+  } catch (error) {
+    console.error("Error fetching counts:", error);
+    res.status(500).json({ message: "Server error fetching counts" });
+  }
+});
+
+// function to fetch all the user from the database . to show on the admin dashboard.
+
+// Route to get all users
+app.get("/admin-dashboard/users", async (req, res) => {
+  try {
+    // Fetch all users from different collections
+    const admins = await Admin.find({}, "name email role adminAvatar");
+    const teachers = await Teacher.find({}, "name email role teacherAvatar");
+    const students = await Student.find({}, "name email role studentAvatar");
+
+    // Combine all users into a single array
+    const users = [
+      ...admins.map((admin) => ({
+        id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role,
+        avatar: admin.adminAvatar,
+      })),
+      ...teachers.map((teacher) => ({
+        id: teacher._id,
+        name: teacher.name,
+        email: teacher.email,
+        role: teacher.role,
+        avatar: teacher.teacherAvatar,
+      })),
+      ...students.map((student) => ({
+        id: student._id,
+        name: student.name,
+        email: student.email,
+        role: student.role,
+        avatar: student.studentAvatar,
+      })),
+    ];
+
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Server error fetching users" });
   }
 });
 
