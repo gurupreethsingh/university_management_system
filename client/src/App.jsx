@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import Homepage from "./pages/common_pages/Homepage";
 import PageNotFound from "./pages/common_pages/PageNotFound";
 import Header from "./components/Header";
@@ -26,6 +27,9 @@ import WorkWithUs from "./components/WorkWithUs";
 import NewsLetter from "./components/NewsLetter";
 import Footer from "./components/Footer";
 import AllBlogs from "./pages/blog_pages/AllBlogs";
+import AdminResetPassword from "./pages/admin_pages/AdminResetPassword";
+
+const isAuthenticated = localStorage.getItem("adminToken");
 
 const App = () => (
   <Router>
@@ -43,6 +47,7 @@ const App = () => (
       <Route path="/admin-login" element={<AdminLogin />} />
       <Route path="/admin-forgot-password" element={<AdminForgotPassword />} />
       <Route path="/admin-dashboard" element={<AdminDashboard />} />
+      <Route path="/admin-login" element={<AdminLogin />} />
 
       {/* student routes */}
       <Route path="/student-register" element={<StudentRegister />} />
@@ -60,6 +65,10 @@ const App = () => (
         path="/teacher-forgot-password"
         element={<TeacherForgotPassword />}
       />
+      <Route
+        path="/admin-reset-password/:token"
+        element={<AdminResetPassword />}
+      ></Route>
 
       {/* contact and messages routes */}
       <Route path="/all-messages" element={<AllMessages />} />

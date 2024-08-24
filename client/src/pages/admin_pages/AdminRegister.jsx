@@ -1,4 +1,87 @@
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 export default function AdminRegister() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "admin", // Automatically set role to "admin"
+  });
+
+  const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
+
+  const validateForm = () => {
+    let formErrors = {};
+
+    // Name validation: cannot be only spaces
+    if (!formData.name.trim()) {
+      formErrors.name = "Name cannot be only spaces.";
+    }
+
+    // Email validation: cannot have spaces and must follow email format
+    if (!formData.email || /\s/.test(formData.email)) {
+      formErrors.email = "Email cannot contain spaces.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      formErrors.email = "Please enter a valid email address.";
+    }
+
+    // Password validation: min 6 characters, 1 lowercase, 1 uppercase, 1 number, 1 special character, no spaces
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{6,}$/;
+    if (!formData.password) {
+      formErrors.password = "Password is required.";
+    } else if (/\s/.test(formData.password)) {
+      formErrors.password = "Password cannot contain spaces.";
+    } else if (!passwordRegex.test(formData.password)) {
+      formErrors.password =
+        "Password must be at least 6 characters long and include 1 lowercase, 1 uppercase, 1 number, and 1 special character.";
+    }
+
+    setErrors(formErrors);
+    return Object.keys(formErrors).length === 0;
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (validateForm()) {
+      try {
+        const response = await fetch("http://localhost:5000/admin-register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+
+        if (response.ok) {
+          setSuccessMessage("Registration successful!");
+          setFormData({
+            name: "",
+            email: "",
+            password: "",
+            role: "admin",
+          });
+          setErrors({});
+          alert("Registeration Successfull.");
+          navigate("/admin-login");
+        } else {
+          const errorData = await response.json();
+          setErrors({ submit: errorData.message || "Registration failed." });
+        }
+      } catch (error) {
+        setErrors({ submit: "An error occurred. Please try again." });
+      }
+    }
+  };
+
   return (
     <>
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
@@ -14,7 +97,7 @@ export default function AdminRegister() {
         </div>
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form action="#" method="POST" className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
                 htmlFor="name"
@@ -28,9 +111,13 @@ export default function AdminRegister() {
                   name="name"
                   type="text"
                   required
-                  autoComplete="name"
+                  value={formData.name}
+                  onChange={handleChange}
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
+                {errors.name && (
+                  <p className="mt-2 text-sm text-red-600">{errors.name}</p>
+                )}
               </div>
             </div>
             <div>
@@ -46,31 +133,36 @@ export default function AdminRegister() {
                   name="email"
                   type="email"
                   required
-                  autoComplete="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
+                {errors.email && (
+                  <p className="mt-2 text-sm text-red-600">{errors.email}</p>
+                )}
               </div>
             </div>
 
             <div>
-              <div className="flex items-center justify-between">
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  Password
-                </label>
-                <div className="text-sm"></div>
-              </div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Password
+              </label>
               <div className="mt-2">
                 <input
                   id="password"
                   name="password"
                   type="password"
                   required
-                  autoComplete="current-password"
+                  value={formData.password}
+                  onChange={handleChange}
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
+                {errors.password && (
+                  <p className="mt-2 text-sm text-red-600">{errors.password}</p>
+                )}
               </div>
             </div>
 
@@ -81,11 +173,17 @@ export default function AdminRegister() {
               >
                 Register as admin
               </button>
+              {errors.submit && (
+                <p className="mt-2 text-sm text-red-600">{errors.submit}</p>
+              )}
+              {successMessage && (
+                <p className="mt-2 text-sm text-green-600">{successMessage}</p>
+              )}
             </div>
           </form>
 
           <p className="mt-10 text-center text-sm text-gray-500">
-            Already an admin ?{" "}
+            Already an admin?{" "}
             <a
               href="/admin-login"
               className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
