@@ -10,7 +10,6 @@ export default function AdminLogin() {
 
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  axios.defaults.withCredentials = true;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -27,8 +26,16 @@ export default function AdminLogin() {
       );
 
       if (response.data.status) {
-        localStorage.setItem("adminToken", response.data.token); // Save token to localStorage
-        localStorage.setItem("user", JSON.stringify(response.data.admin)); // Save user data
+        // Save the token to localStorage
+        localStorage.setItem("adminToken", response.data.token);
+
+        // Save user data to localStorage
+        localStorage.setItem("user", JSON.stringify(response.data.admin));
+
+        // Dispatch storage event to trigger header update
+        window.dispatchEvent(new Event("storage"));
+
+        // Redirect to the admin dashboard
         navigate("/admin-dashboard");
       } else {
         setError(response.data.message || "Login failed");

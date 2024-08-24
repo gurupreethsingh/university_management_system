@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Navigate } from "react-router-dom";
 import Homepage from "./pages/common_pages/Homepage";
 import PageNotFound from "./pages/common_pages/PageNotFound";
 import Header from "./components/Header";
@@ -28,56 +27,100 @@ import NewsLetter from "./components/NewsLetter";
 import Footer from "./components/Footer";
 import AllBlogs from "./pages/blog_pages/AllBlogs";
 import AdminResetPassword from "./pages/admin_pages/AdminResetPassword";
-
-const isAuthenticated = localStorage.getItem("adminToken");
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const App = () => (
   <Router>
     <Header />
     <Routes>
+      {/* Public Routes */}
       <Route path="/" element={<Homepage />} />
       <Route path="/homepage" element={<Homepage />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/about" element={<About />} />
-      <Route path="/profile" element={<Profile />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/blogs" element={<AllBlogs />} />
 
-      {/* admin routes */}
+      {/* Public Routes: Admin, Teacher, and Student Login/Register */}
       <Route path="/admin-register" element={<AdminRegister />} />
       <Route path="/admin-login" element={<AdminLogin />} />
       <Route path="/admin-forgot-password" element={<AdminForgotPassword />} />
-      <Route path="/admin-dashboard" element={<AdminDashboard />} />
-      <Route path="/admin-login" element={<AdminLogin />} />
-
-      {/* student routes */}
+      <Route
+        path="/admin-reset-password/:token"
+        element={<AdminResetPassword />}
+      />
       <Route path="/student-register" element={<StudentRegister />} />
       <Route path="/student-login" element={<StudentLogin />} />
       <Route
         path="/student-forgot-password"
         element={<StudentForgotPassword />}
       />
-      <Route path="/student-dashboard" element={<StudentDashboard />} />
-
-      {/* teacher routes */}
       <Route path="/teacher-register" element={<TeacherRegister />} />
       <Route path="/teacher-login" element={<TeacherLogin />} />
       <Route
         path="/teacher-forgot-password"
         element={<TeacherForgotPassword />}
       />
+
+      {/* Protected Routes */}
       <Route
-        path="/admin-reset-password/:token"
-        element={<AdminResetPassword />}
-      ></Route>
+        path="/admin-dashboard"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student-dashboard"
+        element={
+          <ProtectedRoute>
+            <StudentDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher-dashboard"
+        element={
+          <ProtectedRoute>
+            <TeacherDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/all-messages"
+        element={
+          <ProtectedRoute>
+            <AllMessages />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/reply-message/:id"
+        element={
+          <ProtectedRoute>
+            <ReplyMessage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/all-replies"
+        element={
+          <ProtectedRoute>
+            <AllReplies />
+          </ProtectedRoute>
+        }
+      />
 
-      {/* contact and messages routes */}
-      <Route path="/all-messages" element={<AllMessages />} />
-      <Route path="/reply-message/:id" element={<ReplyMessage />} />
-      <Route path="/all-replies" element={<AllReplies />} />
-
-      <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
-      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-      <Route path="/page-not-found" element={<PageNotFound />} />
+      {/* Page Not Found */}
       <Route path="/*" element={<PageNotFound />} />
     </Routes>
     <WorkWithUs />

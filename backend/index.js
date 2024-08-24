@@ -11,7 +11,9 @@ const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 const Admin = require("./models/AdminModel"); // Your admin model
-const nodemailer = require("nodemailer");
+const Teacher = require("./models/TeacherModel");
+const Student = require("./models/StudentModel");
+const auth = require("./middleware/auth");
 
 // Load environment variables from .env file
 dotenv.config();
@@ -186,35 +188,203 @@ app.post("/admin-login", async (req, res) => {
     // Check if the admin exists
     const admin = await Admin.findOne({ email });
     if (!admin) {
-      return res.status(400).json({ msg: "Invalid Credentials" });
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
     // Check if the password is correct
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
-      return res.status(400).json({ msg: "Invalid Credentials" });
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Generate a JWT token
-    const payload = {
-      admin: {
-        id: admin._id,
-        role: admin.role,
-        name: admin.name,
-      },
-    };
+    // Create a JWT token
+    const token = jwt.sign(
+      { id: admin._id, email: admin.email, name: admin.name },
+      "ecoders_jwt_secret",
+      { expiresIn: "1h" }
+    );
 
-    const token = jwt.sign(payload, "ecoders_jwt_secret", { expiresIn: "1h" });
-
-    // Set the JWT token in an HTTP-only cookie
-    res.cookie("token", token, { httpOnly: true, maxAge: 360000 });
-
-    return res.json({ status: true, message: "Login Successful." });
+    // Return the token and admin data
+    res.json({
+      status: true,
+      token,
+      admin: { id: admin._id, name: admin.name, email: admin.email },
+    });
   } catch (err) {
-    console.error("Error in login:", err);
-    return res
-      .status(500)
-      .json({ msg: "Server error. Please try again later." });
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// teacher routes.
+
+// register teacher.
+
+app.post("/teacher-register", async (req, res) => {
+  const { name, email, password } = req.body;
+
+  try {
+    // Check if the teacher already exists
+    let teacher = await Teacher.findOne({ email });
+    if (teacher) {
+      return res.status(400).json({ msg: "Teacher already exists" });
+    }
+
+    // Create a new teacher
+    teacher = new Teacher({
+      name,
+      email,
+      password,
+    });
+
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    teacher.password = await bcrypt.hash(password, salt);
+
+    // Save the teacher to the database
+    await teacher.save();
+
+    res.status(201).json({ msg: "Teacher registered successfully" });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// teacher login,
+
+// Login route for Teacher
+app.post("/teacher-login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Check if the teacher exists
+    const teacher = await Teacher.findOne({ email });
+    if (!teacher) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // Check if the password is correct
+    const isMatch = await bcrypt.compare(password, teacher.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // Create a JWT token
+    const token = jwt.sign(
+      { id: teacher._id, email: teacher.email, name: teacher.name },
+      "ecoders_jwt_secret",
+      { expiresIn: "1h" }
+    );
+
+    // Return the token and teacher data
+    res.json({
+      status: true,
+      token,
+      teacher: { id: teacher._id, name: teacher.name, email: teacher.email },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// student routes.
+
+// student register route.
+
+// Student Registration route
+app.post("/student-register", async (req, res) => {
+  const { name, email, password } = req.body;
+
+  try {
+    // Check if the student already exists
+    let student = await Student.findOne({ email });
+    if (student) {
+      return res.status(400).json({ msg: "Student already exists" });
+    }
+
+    // Create a new student
+    student = new Student({
+      name,
+      email,
+      password,
+    });
+
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    student.password = await bcrypt.hash(password, salt);
+
+    // Save the student to the database
+    await student.save();
+
+    res.status(201).json({ msg: "Student registered successfully" });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// student login code.
+
+// Student Login route
+app.post("/student-login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Check if the student exists
+    const student = await Student.findOne({ email });
+    if (!student) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // Check if the password is correct
+    const isMatch = await bcrypt.compare(password, student.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // Create a JWT token
+    const token = jwt.sign(
+      { id: student._id, email: student.email, name: student.name },
+      "ecoders_jwt_secret",
+      { expiresIn: "1h" }
+    );
+
+    // Return the token and student data
+    res.json({
+      status: true,
+      token,
+      student: { id: student._id, name: student.name, email: student.email },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// profile page code.
+
+app.get("/profile", auth, async (req, res) => {
+  try {
+    let user;
+
+    if (req.user.role === "admin") {
+      user = await Admin.findById(req.user.id);
+    } else if (req.user.role === "teacher") {
+      user = await Teacher.findById(req.user.id);
+    } else if (req.user.role === "student") {
+      user = await Student.findById(req.user.id);
+    }
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Server error");
   }
 });
 

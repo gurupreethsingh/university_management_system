@@ -49,12 +49,58 @@
 
 // export default AdminDashboard;
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const AdminDashboard = () => {
+  const [user, setUser] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    try {
+      // Retrieve the user data from localStorage
+      const storedUser = localStorage.getItem("user");
+
+      // Check if storedUser is not null or undefined and is a valid JSON string
+      if (storedUser && storedUser !== "undefined") {
+        const parsedUser = JSON.parse(storedUser);
+        if (parsedUser && typeof parsedUser === "object") {
+          setUser(parsedUser);
+        } else {
+          setError("Invalid user data. Please log in again.");
+        }
+      } else {
+        setError("No user data found. Please log in again.");
+      }
+    } catch (err) {
+      // Handle JSON parsing errors
+      console.error("Failed to parse user data:", err);
+      setError("Failed to load user data. Please log in again.");
+    }
+  }, []);
+
+  useEffect(() => {
+    // Check if the page has already been reloaded
+    const hasReloaded = sessionStorage.getItem("hasReloaded");
+
+    if (!hasReloaded) {
+      // Set a flag in sessionStorage to indicate that the page has been reloaded
+      sessionStorage.setItem("hasReloaded", "true");
+      // Reload the page once
+      window.location.reload();
+    }
+  }, []);
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div>
-      <h1>Welcome to the Admin Dashboard</h1>
+      <h1>Welcome to the Admin Dashboard, {user.name}</h1>
       {/* Add your admin dashboard content here */}
     </div>
   );
