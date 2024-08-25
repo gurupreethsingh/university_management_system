@@ -14,13 +14,14 @@ const studentSchema = new mongoose.Schema({
   phone: { type: String }, // Student's phone number
   address: { type: String }, // Student's address
   dateOfBirth: { type: Date }, // Student's date of birth
-  enrollmentNumber: { type: String, unique: true }, // Unique enrollment number for the student
+  enrollmentNumber: { type: String, unique: true, required: true }, // Unique enrollment number for the student
   department: { type: String }, // Department the student is enrolled in
   course: { type: String }, // Course the student is enrolled in
   yearOfStudy: { type: Number }, // Year of study (e.g., 1st year, 2nd year)
   qualifications: { type: String }, // Previous academic qualifications
   bio: { type: String }, // Short biography of the student
   createdDate: { type: Date, default: Date.now },
+  supervisedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Teacher" },
 
   // Relations to Courses, Exams, Teachers, etc.
   enrolledCourses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Course" }], // Courses the student is enrolled in

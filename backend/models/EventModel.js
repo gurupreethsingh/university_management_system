@@ -6,6 +6,7 @@ const eventSchema = new mongoose.Schema({
   location: { type: String },
   description: { type: String },
   createdDate: { type: Date, default: Date.now },
+  organizedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Teacher" },
 });
 
 const Event = mongoose.model("Event", eventSchema);
