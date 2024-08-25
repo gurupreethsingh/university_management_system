@@ -398,8 +398,6 @@ app.get("/profile", auth, async (req, res) => {
   }
 });
 
-
-
 app.get("/teacher-dashboard/counts", authenticateToken, async (req, res) => {
   try {
     const totalTeachers = await Teacher.countDocuments(); // This gives the total number of teachers
@@ -418,7 +416,7 @@ app.get("/teacher-dashboard/counts", authenticateToken, async (req, res) => {
     });
 
     res.json({
-      totalTeachers,  // Use this for total teacher count
+      totalTeachers, // Use this for total teacher count
       assignedCourses,
       conductedExams,
       supervisedStudents,
@@ -429,7 +427,6 @@ app.get("/teacher-dashboard/counts", authenticateToken, async (req, res) => {
     res.status(500).json({ message: "Server error fetching counts" });
   }
 });
-
 
 // function to fetch all the user from the database . to show on the admin dashboard.
 
@@ -473,11 +470,13 @@ app.get("/admin-dashboard/users", async (req, res) => {
   }
 });
 
-
 // Route to get counts for the AdminDashboard
 app.get("/admin-dashboard/counts", async (req, res) => {
   try {
-    const totalUsers = await Admin.countDocuments() + await Teacher.countDocuments() + await Student.countDocuments();
+    const totalUsers =
+      (await Admin.countDocuments()) +
+      (await Teacher.countDocuments()) +
+      (await Student.countDocuments());
     const totalAdmins = await Admin.countDocuments();
     const totalTeachers = await Teacher.countDocuments();
     const totalStudents = await Student.countDocuments();
@@ -496,7 +495,6 @@ app.get("/admin-dashboard/counts", async (req, res) => {
   }
 });
 
-
 // Route to get counts for the TeacherDashboard
 app.get("/teacher-dashboard/counts", async (req, res) => {
   try {
@@ -514,10 +512,6 @@ app.get("/teacher-dashboard/counts", async (req, res) => {
     res.status(500).json({ message: "Server error fetching counts" });
   }
 });
-
-
-
-
 
 // Route to get all teachers
 app.get("/teacher-dashboard/teachers", async (req, res) => {
