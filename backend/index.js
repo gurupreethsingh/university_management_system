@@ -398,48 +398,12 @@ app.get("/profile", auth, async (req, res) => {
   }
 });
 
-// function to count all the user counts
 
-// Route to get counts of various entities
-// app.get("/teacher-dashboard/counts", async (req, res) => {
-//   try {
-//     const teacherId = ObjectId(req.user._id); // Convert string to ObjectId
-
-//     const totalTeachers = await Teacher.countDocuments();
-//     const assignedCourses = await Course.countDocuments({
-//       assignedTeacher: teacherId,
-//     });
-//     const conductedExams = await Exam.countDocuments({
-//       conductedBy: teacherId,
-//     });
-//     const supervisedStudents = await Student.countDocuments({
-//       supervisedBy: teacherId,
-//     });
-//     const eventsOrganized = await Event.countDocuments({
-//       organizedBy: teacherId,
-//     });
-
-//     res.json({
-//       totalTeachers,
-//       assignedCourses,
-//       conductedExams,
-//       supervisedStudents,
-//       eventsOrganized,
-//     });
-//   } catch (error) {
-//     console.error("Error fetching counts:", error);
-//     res.status(500).json({ message: "Server error fetching counts" });
-//   }
-// });
 
 app.get("/teacher-dashboard/counts", authenticateToken, async (req, res) => {
   try {
-    // Check if req.user is defined
-    if (!req.user) {
-      return res.status(400).json({ message: "User not authenticated" });
-    }
+    const totalTeachers = await Teacher.countDocuments(); // This gives the total number of teachers
 
-    const totalTeachers = await Teacher.countDocuments();
     const assignedCourses = await Course.countDocuments({
       assignedTeacher: req.user._id,
     });
@@ -454,7 +418,7 @@ app.get("/teacher-dashboard/counts", authenticateToken, async (req, res) => {
     });
 
     res.json({
-      totalTeachers,
+      totalTeachers,  // Use this for total teacher count
       assignedCourses,
       conductedExams,
       supervisedStudents,
@@ -465,6 +429,7 @@ app.get("/teacher-dashboard/counts", authenticateToken, async (req, res) => {
     res.status(500).json({ message: "Server error fetching counts" });
   }
 });
+
 
 // function to fetch all the user from the database . to show on the admin dashboard.
 
@@ -508,132 +473,51 @@ app.get("/admin-dashboard/users", async (req, res) => {
   }
 });
 
-// teacher count
 
-// Route to get counts for teacher dashboard
-// app.get("/teacher-dashboard/counts", async (req, res) => {
-//   try {
-//     const totalTeachers = await Teacher.countDocuments();
-//     const assignedCourses = await Course.countDocuments({
-//       assignedTeacher: req.user._id,
-//     });
-//     const conductedExams = await Exam.countDocuments({
-//       conductedBy: req.user._id,
-//     });
-//     const supervisedStudents = await Student.countDocuments({
-//       supervisedBy: req.user._id,
-//     });
-//     const eventsOrganized = await Event.countDocuments({
-//       organizedBy: req.user._id,
-//     });
-
-//     res.json({
-//       totalTeachers,
-//       assignedCourses,
-//       conductedExams,
-//       supervisedStudents,
-//       eventsOrganized,
-//     });
-//   } catch (error) {
-//     console.error("Error fetching counts:", error);
-//     res.status(500).json({ message: "Server error fetching counts" });
-//   }
-// });
-
-// app.get("/teacher-dashboard/counts", async (req, res) => {
-//   try {
-//     const teacherId = ObjectId(req.user._id); // Convert string to ObjectId
-
-//     const totalTeachers = await Teacher.countDocuments();
-//     const assignedCourses = await Course.countDocuments({
-//       assignedTeacher: teacherId,
-//     });
-//     const conductedExams = await Exam.countDocuments({
-//       conductedBy: teacherId,
-//     });
-//     const supervisedStudents = await Student.countDocuments({
-//       supervisedBy: teacherId,
-//     });
-//     const eventsOrganized = await Event.countDocuments({
-//       organizedBy: teacherId,
-//     });
-
-//     res.json({
-//       totalTeachers,
-//       assignedCourses,
-//       conductedExams,
-//       supervisedStudents,
-//       eventsOrganized,
-//     });
-//   } catch (error) {
-//     console.error("Error fetching counts:", error);
-//     res.status(500).json({ message: "Server error fetching counts" });
-//   }
-// });
-
-// app.get("/teacher-dashboard/counts", authenticateToken, async (req, res) => {
-//   try {
-//     const totalTeachers = await Teacher.countDocuments();
-//     const assignedCourses = await Course.countDocuments({
-//       assignedTeacher: req.user._id,
-//     });
-//     const conductedExams = await Exam.countDocuments({
-//       conductedBy: req.user._id,
-//     });
-//     const supervisedStudents = await Student.countDocuments({
-//       supervisedBy: req.user._id,
-//     });
-//     const eventsOrganized = await Event.countDocuments({
-//       organizedBy: req.user._id,
-//     });
-
-//     res.json({
-//       totalTeachers,
-//       assignedCourses,
-//       conductedExams,
-//       supervisedStudents,
-//       eventsOrganized,
-//     });
-//   } catch (error) {
-//     console.error("Error fetching counts:", error);
-//     res.status(500).json({ message: "Server error fetching counts" });
-//   }
-// });
-
-app.get("/teacher-dashboard/counts", authenticateToken, async (req, res) => {
-  console.log("req.user:", req.user); // Debugging log
-
-  if (!req.user) {
-    return res.status(400).json({ message: "User not authenticated" });
-  }
-
+// Route to get counts for the AdminDashboard
+app.get("/admin-dashboard/counts", async (req, res) => {
   try {
+    const totalUsers = await Admin.countDocuments() + await Teacher.countDocuments() + await Student.countDocuments();
+    const totalAdmins = await Admin.countDocuments();
     const totalTeachers = await Teacher.countDocuments();
-    const assignedCourses = await Course.countDocuments({
-      assignedTeacher: req.user._id,
-    });
-    const conductedExams = await Exam.countDocuments({
-      conductedBy: req.user._id,
-    });
-    const supervisedStudents = await Student.countDocuments({
-      supervisedBy: req.user._id,
-    });
-    const eventsOrganized = await Event.countDocuments({
-      organizedBy: req.user._id,
-    });
+    const totalStudents = await Student.countDocuments();
+    const totalEvents = await Event.countDocuments();
 
-    res.json({
+    res.status(200).json({
+      totalUsers,
+      totalAdmins,
       totalTeachers,
-      assignedCourses,
-      conductedExams,
-      supervisedStudents,
-      eventsOrganized,
+      totalStudents,
+      totalEvents,
     });
   } catch (error) {
     console.error("Error fetching counts:", error);
     res.status(500).json({ message: "Server error fetching counts" });
   }
 });
+
+
+// Route to get counts for the TeacherDashboard
+app.get("/teacher-dashboard/counts", async (req, res) => {
+  try {
+    const totalTeachers = await Teacher.countDocuments();
+    const totalStudents = await Student.countDocuments();
+    const totalExams = await Exam.countDocuments(); // Assuming you have an Exam model
+
+    res.status(200).json({
+      totalTeachers,
+      totalStudents,
+      totalExams,
+    });
+  } catch (error) {
+    console.error("Error fetching counts:", error);
+    res.status(500).json({ message: "Server error fetching counts" });
+  }
+});
+
+
+
+
 
 // Route to get all teachers
 app.get("/teacher-dashboard/teachers", async (req, res) => {

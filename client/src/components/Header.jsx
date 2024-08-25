@@ -177,7 +177,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white">
+    <header className="bg-white border-b">
       <nav
         aria-label="Global"
         className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
