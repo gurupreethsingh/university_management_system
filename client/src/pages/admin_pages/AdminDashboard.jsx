@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
-  FaUser,
+  FaUserPlus,
   FaChalkboardTeacher,
   FaUsers,
   FaCalendarAlt,
@@ -11,7 +11,6 @@ import {
   FaRegListAlt,
   FaTh,
   FaThLarge,
-  FaUserPlus,
   FaUserGraduate,
   FaUserTie,
   FaEnvelopeOpenText,
@@ -32,12 +31,7 @@ const AdminDashboard = () => {
     try {
       const storedUser = localStorage.getItem("user");
       if (storedUser && storedUser !== "undefined") {
-        const parsedUser = JSON.parse(storedUser);
-        if (parsedUser && typeof parsedUser === "object") {
-          setUser(parsedUser);
-        } else {
-          setError("Invalid user data. Please log in again.");
-        }
+        setUser(JSON.parse(storedUser));
       } else {
         setError("No user data found. Please log in again.");
       }
@@ -53,7 +47,6 @@ const AdminDashboard = () => {
         const res = await axios.get(
           "http://localhost:5000/admin-dashboard/counts"
         );
-        console.log("Received Counts:", res.data);
         setCounts(res.data);
       } catch (err) {
         console.error("Error fetching counts:", err);
@@ -61,7 +54,7 @@ const AdminDashboard = () => {
     };
 
     fetchCounts();
-  }, []); // This useEffect runs once after the component mounts
+  }, []);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -76,7 +69,7 @@ const AdminDashboard = () => {
     };
 
     fetchUsers();
-  }, []); // This useEffect runs once after the component mounts
+  }, []);
 
   const filteredUsers = users.filter((user) =>
     Object.values(user).some((value) =>
@@ -99,103 +92,101 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6 md:px-8 lg:px-12 mx-auto max-w-7xl">
       <h1 className="text-2xl font-bold mb-4">
         Welcome to the Admin Dashboard, {user.name}
       </h1>
-
       {/* Count Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
-        <div className="p-4 bg-blue-500 text-white rounded shadow">
-          <FaUsers className="text-3xl mb-2" />
-          <h2 className="text-lg">Total Users</h2>
-          <p className="text-2xl">{counts.totalUsers || 0}</p>
-        </div>
-        <div className="p-4 bg-green-500 text-white rounded shadow">
-          <FaUserTie className="text-3xl mb-2" />
-          <h2 className="text-lg">Total Admins</h2>
-          <p className="text-2xl">{counts.totalAdmins || 0}</p>
-        </div>
-        <div className="p-4 bg-purple-500 text-white rounded shadow">
-          <FaChalkboardTeacher className="text-3xl mb-2" />
-          <h2 className="text-lg">Total Teachers</h2>
-          <p className="text-2xl">{counts.totalTeachers || 0}</p>
-        </div>
-        <div className="p-4 bg-yellow-500 text-white rounded shadow">
-          <FaUserGraduate className="text-3xl mb-2" />
-          <h2 className="text-lg">Total Students</h2>
-          <p className="text-2xl">{counts.totalStudents || 0}</p>
-        </div>
-        <div className="p-4 bg-red-500 text-white rounded shadow">
-          <FaCalendarAlt className="text-3xl mb-2" />
-          <h2 className="text-lg">Total Events</h2>
-          <p className="text-2xl">{counts.totalEvents || 0}</p>
-        </div>
+        {[
+          {
+            icon: FaUsers,
+            title: "Total Users",
+            count: counts.totalUsers || 0,
+            iconColor: "text-blue-500",
+          },
+          {
+            icon: FaUserTie,
+            title: "Total Admins",
+            count: counts.totalAdmins || 0,
+            iconColor: "text-green-500",
+          },
+          {
+            icon: FaChalkboardTeacher,
+            title: "Total Teachers",
+            count: counts.totalTeachers || 0,
+            iconColor: "text-purple-500",
+          },
+          {
+            icon: FaUserGraduate,
+            title: "Total Students",
+            count: counts.totalStudents || 0,
+            iconColor: "text-yellow-500",
+          },
+          {
+            icon: FaCalendarAlt,
+            title: "Total Events",
+            count: counts.totalEvents || 0,
+            iconColor: "text-red-500",
+          },
+        ].map((card, index) => (
+          <div
+            key={index}
+            className="p-4 bg-white text-gray-900 rounded shadow flex items-center space-x-2"
+          >
+            <card.icon className={`text-3xl ${card.iconColor}`} />
+            <div>
+              <h2 className="text-lg">{card.title}</h2>
+              <p className="text-2xl">{card.count}</p>
+            </div>
+          </div>
+        ))}
       </div>
-
       {/* Admin Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
         <Link
-          to="/admin/add-admin"
-          className="p-4 bg-gray-100 text-gray-900 rounded shadow hover:bg-gray-200 transition"
+          to="/admin/add-user"
+          className="flex flex-col items-center p-4 bg-gray-100 rounded shadow hover:bg-gray-200 transition"
         >
-          <FaUserPlus className="text-3xl text-indigo-600 mb-2" />
-          <h2 className="text-lg font-semibold">Add Admin</h2>
-          <p className="text-sm">Manage and add new admin users.</p>
+          <FaUserPlus className="text-3xl text-green-600 mb-2" />
+          <h2 className="text-lg font-semibold">Add User</h2>
+          <p className="text-sm">Add new admins, teachers, or students.</p>
         </Link>
         <Link
-          to="/admin/add-teacher"
-          className="p-4 bg-gray-100 text-gray-900 rounded shadow hover:bg-gray-200 transition"
+          to="/admin/manage-courses"
+          className="flex flex-col items-center p-4 bg-gray-100 rounded shadow hover:bg-gray-200 transition"
         >
-          <FaUserPlus className="text-3xl text-teal-600 mb-2" />
-          <h2 className="text-lg font-semibold">Add Teacher</h2>
-          <p className="text-sm">Manage and add new teachers.</p>
+          <FaChalkboardTeacher className="text-3xl text-blue-600 mb-2" />
+          <h2 className="text-lg font-semibold">Manage Courses</h2>
+          <p className="text-sm">Assign and manage courses.</p>
         </Link>
         <Link
-          to="/admin/add-student"
-          className="p-4 bg-gray-100 text-gray-900 rounded shadow hover:bg-gray-200 transition"
+          to="/admin/reports"
+          className="flex flex-col items-center p-4 bg-gray-100 rounded shadow hover:bg-gray-200 transition"
         >
-          <FaUserPlus className="text-3xl text-yellow-600 mb-2" />
-          <h2 className="text-lg font-semibold">Add Student</h2>
-          <p className="text-sm">Manage and add new students.</p>
+          <FaEnvelopeOpenText className="text-3xl text-red-600 mb-2" />
+          <h2 className="text-lg font-semibold">View Reports</h2>
+          <p className="text-sm">Access system reports and analytics.</p>
         </Link>
         <Link
-          to="/admin/add-exam"
-          className="p-4 bg-gray-100 text-gray-900 rounded shadow hover:bg-gray-200 transition"
+          to="/admin/settings"
+          className="flex flex-col items-center p-4 bg-gray-100 rounded shadow hover:bg-gray-200 transition"
         >
-          <FaPlus className="text-3xl text-red-600 mb-2" />
-          <h2 className="text-lg font-semibold">Add Exam</h2>
-          <p className="text-sm">Create and manage exams.</p>
+          <FaThLarge className="text-3xl text-purple-600 mb-2" />
+          <h2 className="text-lg font-semibold">Settings</h2>
+          <p className="text-sm">Adjust system settings.</p>
         </Link>
-        <Link
-          to="/admin/reply-messages"
-          className="p-4 bg-gray-100 text-gray-900 rounded shadow hover:bg-gray-200 transition"
-        >
-          <FaReply className="text-3xl text-blue-600 mb-2" />
-          <h2 className="text-lg font-semibold">Reply to Messages</h2>
-          <p className="text-sm">Respond to contact form messages.</p>
-        </Link>
-        <Link
-          to="/admin/view-messages"
-          className="p-4 bg-gray-100 text-gray-900 rounded shadow hover:bg-gray-200 transition"
-        >
-          <FaEnvelopeOpenText className="text-3xl text-green-600 mb-2" />
-          <h2 className="text-lg font-semibold">View Messages</h2>
-          <p className="text-sm">View all contact form messages.</p>
-        </Link>
-        {/* Add more admin action cards as needed */}
       </div>
-
       {/* User List with Search and View Options */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold">All Activities</h2>
+        <h2 className="text-lg font-bold">All Users</h2>
         <div className="flex items-center space-x-2">
           <input
             type="text"
             placeholder="Search users..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="p-2 border border-gray-300 rounded ml-2"
+            className="p-2 border border-gray-300 rounded"
           />
           <FaSearch className="text-gray-500" />
           <button
@@ -218,14 +209,13 @@ const AdminDashboard = () => {
           </button>
         </div>
       </div>
-
       {/* User Display */}
       <div
         className={`grid gap-4 ${
           viewMode === "list"
             ? "grid-cols-1"
             : viewMode === "grid"
-            ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-6"
+            ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6" // Adjusted for mobile compatibility
             : "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
         }`}
       >
@@ -253,30 +243,29 @@ const AdminDashboard = () => {
                 <h2 className="text-lg font-semibold">{user.name}</h2>
                 <p className="text-sm text-gray-500">{user.role}</p>
                 <p className="text-sm text-gray-500">Email: {user.email}</p>
-                {/* Add more fields as necessary */}
               </div>
             </div>
           </Link>
         ))}
       </div>
-
       {/* Pagination */}
       <div className="flex justify-center mt-6">
         <ul className="inline-flex -space-x-px">
-          {[
-            ...Array(Math.ceil(filteredUsers.length / usersPerPage)).keys(),
-          ].map((pageNumber) => (
-            <li key={pageNumber}>
-              <button
-                onClick={() => paginate(pageNumber + 1)}
-                className={`px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 ${
-                  currentPage === pageNumber + 1 ? "bg-gray-200" : ""
-                }`}
-              >
-                {pageNumber + 1}
-              </button>
-            </li>
-          ))}
+          {Array.from(
+            { length: Math.ceil(filteredUsers.length / usersPerPage) },
+            (_, index) => (
+              <li key={index}>
+                <button
+                  onClick={() => paginate(index + 1)}
+                  className={`px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 ${
+                    currentPage === index + 1 ? "bg-gray-200" : ""
+                  }`}
+                >
+                  {index + 1}
+                </button>
+              </li>
+            )
+          )}
         </ul>
       </div>
     </div>
