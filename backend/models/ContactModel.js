@@ -1,64 +1,65 @@
 // models/ContactMessage.js
 
-const mongoose = require('mongoose');
-
+const mongoose = require("mongoose");
 
 const ReplySchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-    },
-    email: {
-        type: String,
-        required: true,
-    },
-    message: {
-        type: String,
-        required: true,
-    },
-    timestamp: {
-        type: Date,
-        default: Date.now,
-    },
+  name: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+  },
+  message: {
+    type: String,
+    required: true,
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-const ContactMessageSchema = new mongoose.Schema({
+const ContactMessageSchema = new mongoose.Schema(
+  {
     firstName: {
-        type: String,
-        required: true,
-        trim: true,
+      type: String,
+      required: true,
+      trim: true,
     },
     lastName: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
     email: {
-        type: String,
-        required: true,
-        trim: true,
-        lowercase: true,
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
     },
     phone: {
-        type: String,
-        trim: true,
+      type: String,
+      trim: true,
     },
     message_text: {
-        type: String,
-        required: true,
-        trim: true,
+      type: String,
+      required: true,
+      trim: true,
     },
     agreeToLicense: {
-        type: Boolean,
-        required: true,
+      type: Boolean,
+      required: true,
     },
     replies: [ReplySchema],
     createdAt: {
-        type: Date,
-        default: Date.now,
+      type: Date,
+      default: Date.now,
     },
-}, {
+  },
+  {
     timestamps: true,
-});
+  }
+);
 
-
-module.exports = mongoose.model('contacts', ContactMessageSchema);
+module.exports = mongoose.model("contacts", ContactMessageSchema);

@@ -79,15 +79,30 @@ app.post("/add-contact-message", async (req, res) => {
 });
 
 // Route to get all contact messages (for admin)
+// app.get("/all-messages", async (req, res) => {
+//   try {
+//     const messages = await ContactMessage.find();
+
+//     res.status(200).json(messages);
+//   } catch (error) {
+//     console.error("Error retrieving contact messages:", error);
+//     res.status(500).json({
+//       error: "An error occurred while retrieving the contact messages.",
+//     });
+//   }
+// });
+
+// Route to get all contact messages along with their replies (for admin)
 app.get("/all-messages", async (req, res) => {
   try {
-    const messages = await ContactMessage.find();
-
+    // Using .find() to retrieve all messages along with their replies
+    const messages = await ContactMessage.find().lean();
     res.status(200).json(messages);
   } catch (error) {
-    console.error("Error retrieving contact messages:", error);
+    console.error("Error retrieving contact messages and replies:", error);
     res.status(500).json({
-      error: "An error occurred while retrieving the contact messages.",
+      error:
+        "An error occurred while retrieving the contact messages and replies.",
     });
   }
 });
