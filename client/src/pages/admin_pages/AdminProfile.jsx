@@ -9,8 +9,10 @@ import {
   FaMapMarkedAlt,
   FaFlagUsa,
 } from "react-icons/fa";
+import { useParams } from "react-router-dom";
 
-export default function Profile() {
+export default function AdminProfile() {
+  const { id } = useParams(); // Get the ID from the URL
   const [user, setUser] = useState(null);
   const [coverImage, setCoverImage] = useState("");
   const [avatar, setAvatar] = useState("");
@@ -18,40 +20,30 @@ export default function Profile() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/profile", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
+        const response = await axios.get(`http://localhost:5000/admin-profile/${id}`);
+        
+        console.log("Fetched user data:", response.data);
         setUser(response.data);
-        setCoverImage(response.data.coverImage);
-        setAvatar(
-          response.data.role === "admin"
-            ? response.data.adminAvatar
-            : response.data.role === "teacher"
-            ? response.data.teacherAvatar
-            : response.data.studentAvatar
-        );
+        setCoverImage(response.data.coverImage || "");
+        setAvatar(response.data.adminAvatar || "");
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     };
-
-    fetchUserData();
-  }, []);
+  
+    fetchUserData(); // Ensure the fetch function is called
+  }, [id]);
 
   const handleCoverImageChange = (e) => {
-    // Implement cover image change logic here
     console.log("Change cover image", e.target.files[0]);
   };
 
   const handleAvatarChange = (e) => {
-    // Implement avatar change logic here
     console.log("Change avatar", e.target.files[0]);
   };
 
   if (!user) {
-    return <div>Loading...</div>;
+    return <div>Loading...</div>; // Display loading while fetching data
   }
 
   return (
@@ -115,7 +107,7 @@ export default function Profile() {
           {/* Name and About Section */}
           <div className="space-y-4">
             <h2 className="text-2xl font-bold text-gray-900">{user.name}</h2>
-            <p className="text-sm leading-6 text-gray-600">{user.bio}</p>
+            <p className="text-sm leading-6 text-gray-600">{user.bio || "No bio available"}</p>
           </div>
 
           {/* Personal Information */}
@@ -141,7 +133,7 @@ export default function Profile() {
                 <FaFlagUsa className="text-blue-500 mr-2" />
                 Country
               </div>
-              <div className="mt-1 text-gray-700">United States</div>
+              <div className="mt-1 text-gray-700">{user.country || "United States"}</div>
             </div>
 
             <div className="text-sm">
@@ -149,7 +141,7 @@ export default function Profile() {
                 <FaHome className="text-orange-500 mr-2" />
                 Address
               </div>
-              <div className="mt-1 text-gray-700">{user.address}</div>
+              <div className="mt-1 text-gray-700">{user.address || "No address available"}</div>
             </div>
 
             <div className="text-sm">
@@ -157,7 +149,7 @@ export default function Profile() {
                 <FaMapMarkedAlt className="text-yellow-500 mr-2" />
                 State / Province
               </div>
-              <div className="mt-1 text-gray-700">{user.department}</div>
+              <div className="mt-1 text-gray-700">{user.state || user.department || "No state/province available"}</div>
             </div>
 
             {/* Add more fields as needed based on the user model */}

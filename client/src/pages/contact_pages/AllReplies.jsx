@@ -1,200 +1,449 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+// // import React, { useState, useEffect } from "react";
+// // import axios from "axios";
+// // import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+
+// // const AllReplies = () => {
+// //   const [messages, setMessages] = useState([]);
+// //   const [currentPage, setCurrentPage] = useState(1);
+// //   const itemsPerPage = 6;
+
+// //   useEffect(() => {
+// //     const fetchMessages = async () => {
+// //       try {
+// //         const token = localStorage.getItem("adminToken"); // Ensure you're using the correct key to retrieve the token
+// //         const response = await axios.get("http://localhost:5000/all-messages", {
+// //           headers: { Authorization: `Bearer ${token}` },
+// //         });
+// //         setMessages(response.data);
+// //       } catch (error) {
+// //         console.error("Failed to fetch messages:", error);
+// //       }
+// //     };
+
+// //     fetchMessages();
+// //   }, []);
+
+// //   // Pagination Logic
+// //   const totalPages = Math.ceil(messages.length / itemsPerPage);
+// //   const currentMessages = messages.slice(
+// //     (currentPage - 1) * itemsPerPage,
+// //     currentPage * itemsPerPage
+// //   );
+
+// //   const goToNextPage = () => {
+// //     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+// //   };
+
+// //   const goToPreviousPage = () => {
+// //     setCurrentPage((prev) => Math.max(prev - 1, 1));
+// //   };
+
+// //   return (
+// //     <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+// //       {currentMessages.map((message, index) => (
+// //         <div key={index} className="p-4 border rounded-lg mb-2">
+// //           <p>
+// //             <strong>Message: {message.message_text}</strong>
+// //             <strong>Sender:</strong> {message.firstName} {message.lastName}
+// //           </p>
+// //           <p>
+// //             <strong>Email:</strong> {message.email}
+// //           </p>
+// //           <p></p>
+// //           <p>
+// //             <strong>Submitted:</strong>{" "}
+// //             {new Date(message.createdAt).toLocaleString()}
+// //           </p>
+// //           {message.replies.length > 0 && (
+// //             <>
+// //               <h4>Replies:</h4>
+// //               {message.replies.map((reply, idx) => (
+// //                 <div key={idx} className="ml-4">
+// //                   <p>
+// //                     <strong>Name:</strong> {reply.name}
+// //                   </p>
+// //                   <p>
+// //                     <strong>Reply:</strong> {reply.message}
+// //                   </p>
+// //                   <p>
+// //                     <strong>Time:</strong>{" "}
+// //                     {new Date(reply.timestamp).toLocaleString()}
+// //                   </p>
+// //                 </div>
+// //               ))}
+// //             </>
+// //           )}
+// //         </div>
+// //       ))}
+
+// //       <div className="flex justify-between">
+// //         <button
+// //           onClick={goToPreviousPage}
+// //           disabled={currentPage === 1}
+// //           className="px-3 py-1 border rounded"
+// //         >
+// //           <FaArrowLeft /> Previous
+// //         </button>
+// //         <span>
+// //           Page {currentPage} of {totalPages}
+// //         </span>
+// //         <button
+// //           onClick={goToNextPage}
+// //           disabled={currentPage === totalPages}
+// //           className="px-3 py-1 border rounded"
+// //         >
+// //           Next <FaArrowRight />
+// //         </button>
+// //       </div>
+// //     </div>
+// //   );
+// // };
+
+// // export default AllReplies;
+
+// import React, { useState, useEffect } from "react";
+// import axios from "axios";
+// import {
+//   FaSearch,
+//   FaArrowLeft,
+//   FaArrowRight,
+//   FaThList,
+//   FaThLarge,
+//   FaTh,
+// } from "react-icons/fa";
+
+// const AllReplies = () => {
+//   const [messages, setMessages] = useState([]);
+//   const [view, setView] = useState("list"); // 'list', 'grid', 'card'
+//   const [searchTerm, setSearchTerm] = useState("");
+//   const [currentPage, setCurrentPage] = useState(1);
+//   const itemsPerPage = 6;
+
+//   useEffect(() => {
+//     fetchMessages();
+//   }, []);
+
+//   const fetchMessages = async () => {
+//     try {
+//       const token = localStorage.getItem("adminToken");
+//       const response = await axios.get("http://localhost:5000/all-messages", {
+//         headers: { Authorization: `Bearer ${token}` },
+//       });
+//       setMessages(
+//         response.data.map((msg) => ({
+//           ...msg,
+//           replies: msg.replies.sort(
+//             (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+//           ),
+//         }))
+//       );
+//     } catch (error) {
+//       console.error("Failed to fetch messages:", error);
+//     }
+//   };
+
+//   const handleSearch = (event) => {
+//     const value = event.target.value.toLowerCase();
+//     setSearchTerm(value);
+//     if (!value.trim()) {
+//       fetchMessages();
+//       return;
+//     }
+//     setMessages(
+//       messages.filter(
+//         (message) =>
+//           message.message_text.toLowerCase().includes(value) ||
+//           message.firstName.toLowerCase().includes(value) ||
+//           message.lastName.toLowerCase().includes(value) ||
+//           message.replies.some((reply) =>
+//             reply.message.toLowerCase().includes(value)
+//           )
+//       )
+//     );
+//   };
+
+//   const totalPages = Math.ceil(messages.length / itemsPerPage);
+//   const currentMessages = messages.slice(
+//     (currentPage - 1) * itemsPerPage,
+//     currentPage * itemsPerPage
+//   );
+
+//   const goToNextPage = () => {
+//     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+//   };
+
+//   const goToPreviousPage = () => {
+//     setCurrentPage((prev) => Math.max(prev - 1, 1));
+//   };
+
+//   const renderMessages = () => {
+//     return currentMessages.map((message, index) => (
+//       <div
+//         key={index}
+//         className={`p-4 border rounded-lg mb-2 ${
+//           view === "card" ? "shadow-md" : ""
+//         }`}
+//       >
+//         <div className="flex justify-between items-center">
+//           <h3 className="font-bold">Message: {message.message_text}</h3>
+//           <span>
+//             <strong>From : </strong>
+//             {message.firstName} {message.lastName} ({message.email})
+//           </span>
+//         </div>
+//         <p>Submitted: {new Date(message.createdAt).toLocaleString()}</p>
+//         {message.replies.length > 0 && (
+//           <>
+//             <h4>Replies:</h4>
+//             {message.replies.map((reply, idx) => (
+//               <div key={idx} className="ml-4">
+//                 <p>
+//                   <strong>Name :</strong> {reply.name}
+//                 </p>
+//                 <p>
+//                   <strong>Reply :</strong> {reply.message}
+//                 </p>
+//                 <p>
+//                   <strong>Time :</strong>{" "}
+//                   {new Date(reply.timestamp).toLocaleString()}
+//                 </p>
+//               </div>
+//             ))}
+//           </>
+//         )}
+//       </div>
+//     ));
+//   };
+
+//   return (
+//     <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+//       <div className="flex justify-between items-center mb-6">
+//         <input
+//           type="text"
+//           placeholder="Search..."
+//           value={searchTerm}
+//           onChange={handleSearch}
+//           className="flex-grow rounded-md border border-gray-300 px-4 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+//         />
+//         <div className="flex ml-4 space-x-2">
+//           <FaThList
+//             className="cursor-pointer text-xl"
+//             onClick={() => setView("list")}
+//           />
+//           <FaThLarge
+//             className="cursor-pointer text-xl"
+//             onClick={() => setView("grid")}
+//           />
+//           <FaTh
+//             className="cursor-pointer text-xl"
+//             onClick={() => setView("card")}
+//           />
+//         </div>
+//       </div>
+
+//       {view === "list" && <div>{renderMessages()}</div>}
+//       {view === "grid" && (
+//         <div className="grid grid-cols-2 gap-4">{renderMessages()}</div>
+//       )}
+//       {view === "card" && (
+//         <div className="grid grid-cols-3 gap-4">{renderMessages()}</div>
+//       )}
+
+//       <div className="flex justify-between items-center mt-8">
+//         <button
+//           onClick={goToPreviousPage}
+//           disabled={currentPage === 1}
+//           className="px-3 py-1 border rounded"
+//         >
+//           <FaArrowLeft /> Previous
+//         </button>
+//         <span>
+//           Page {currentPage} of {totalPages}
+//         </span>
+//         <button
+//           onClick={goToNextPage}
+//           disabled={currentPage === totalPages}
+//           className="px-3 py-1 border rounded"
+//         >
+//           Next <FaArrowRight />
+//         </button>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default AllReplies;
+
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
+  FaSearch,
+  FaArrowLeft,
+  FaArrowRight,
   FaThList,
   FaThLarge,
   FaTh,
-  FaSearch,
-  FaQuestion,
-  FaReply,
-  FaArrowLeft,
-  FaArrowRight,
-  FaEnvelope,
-  FaUser,
-  FaRegClock,
 } from "react-icons/fa";
 
-const initialReplies = [
-  {
-    id: 1,
-    question: "Can you tell me more about your services?",
-    answer:
-      "Yes, we offer a variety of services including web development and design.",
-    timestamp: "2024-08-25 10:15 AM",
-  },
-  {
-    id: 2,
-    question: "Your website is fantastic!",
-    answer: "Thank you for your feedback! We're glad you like it.",
-    timestamp: "2024-08-24 11:00 AM",
-  },
-  {
-    id: 3,
-    question: "I would like to apply for the job posted.",
-    answer: "Please send your resume to hr@example.com.",
-    timestamp: "2024-08-23 09:00 AM",
-  },
-  // Add more replies as needed
-
-  {
-    id: 4,
-    question: "Can you tell me more about your services?",
-    answer:
-      "Yes, we offer a variety of services including web development and design.",
-    timestamp: "2024-08-25 10:15 AM",
-  },
-  {
-    id: 5,
-    question: "Your website is fantastic!",
-    answer: "Thank you for your feedback! We're glad you like it.",
-    timestamp: "2024-08-24 11:00 AM",
-  },
-  {
-    id: 6,
-    question: "I would like to apply for the job posted.",
-    answer: "Please send your resume to hr@example.com.",
-    timestamp: "2024-08-23 09:00 AM",
-  },
-  {
-  id: 7,
-  question: "I would like to apply for the job posted.",
-  answer: "Please send your resume to hr@example.com.",
-  timestamp: "2024-08-23 09:00 AM",
-},
-];
-
-const itemsPerPage = 6;
-
 const AllReplies = () => {
+  const [messages, setMessages] = useState([]);
   const [view, setView] = useState("list");
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredReplies, setFilteredReplies] = useState(
-    initialReplies.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-  );
   const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
+  useEffect(() => {
+    fetchMessages();
+  }, []);
+
+  const fetchMessages = async () => {
+    try {
+      const token = localStorage.getItem("adminToken");
+      const response = await axios.get("http://localhost:5000/all-messages", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMessages(
+        response.data.map((msg) => ({
+          ...msg,
+          replies: msg.replies.sort(
+            (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+          ),
+        }))
+      );
+    } catch (error) {
+      console.error("Failed to fetch messages:", error);
+    }
+  };
 
   const handleSearch = (event) => {
     const value = event.target.value.toLowerCase();
     setSearchTerm(value);
-    const filtered = initialReplies
-      .filter(
-        (reply) =>
-          reply.question.toLowerCase().includes(value) ||
-          reply.answer.toLowerCase().includes(value)
+    if (!value.trim()) {
+      fetchMessages();
+      return;
+    }
+    setMessages(
+      messages.filter(
+        (message) =>
+          message.message_text.toLowerCase().includes(value) ||
+          message.firstName.toLowerCase().includes(value) ||
+          message.lastName.toLowerCase().includes(value) ||
+          message.replies.some((reply) =>
+            reply.message.toLowerCase().includes(value)
+          )
       )
-      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-    setFilteredReplies(filtered);
-    setCurrentPage(1); // Reset to first page after search
+    );
   };
 
-  const totalPages = Math.ceil(filteredReplies.length / itemsPerPage);
-  const paginatedReplies = filteredReplies.slice(
+  const totalPages = Math.ceil(messages.length / itemsPerPage);
+  const currentMessages = messages.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
   const goToNextPage = () => {
-    setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
   const goToPreviousPage = () => {
-    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const renderMessages = () => {
+    return currentMessages.map((message, index) => (
+      <div
+        key={index}
+        className={`p-4 border rounded-lg mb-2 ${
+          view === "card" ? "shadow-md" : ""
+        }`}
+      >
+        <div className="bg-blue-100 p-3 rounded">
+          <h3 className="font-bold text-blue-900">
+            Message: {message.message_text}
+          </h3>
+          <p>
+            <strong>Sender:</strong> {message.firstName} {message.lastName} (
+            {message.email})
+          </p>
+          <p>
+            <strong>Submitted:</strong>{" "}
+            {new Date(message.createdAt).toLocaleString()}
+          </p>
+        </div>
+        {message.replies.length > 0 && (
+          <>
+            <h4 className="mt-3">Replies:</h4>
+            {message.replies.map((reply, idx) => (
+              <div key={idx} className="ml-4 bg-green-100 p-2 rounded">
+                <p className="text-green-900">
+                  <strong>Name:</strong> {reply.name}
+                </p>
+                <p className="text-green-900">
+                  <strong>Reply:</strong> {reply.message}
+                </p>
+                <p className="text-green-900">
+                  <strong>Time:</strong>{" "}
+                  {new Date(reply.timestamp).toLocaleString()}
+                </p>
+              </div>
+            ))}
+          </>
+        )}
+      </div>
+    ));
   };
 
   return (
     <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">All Replies</h2>
-        <div className="flex space-x-4 items-center">
-          <div className="relative w-64">
-            <input
-              type="text"
-              placeholder="Search replies..."
-              value={searchTerm}
-              onChange={handleSearch}
-              className="w-full rounded-md border border-gray-300 px-4 py-2 pl-10 text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            />
-            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          </div>
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={handleSearch}
+          className="flex-grow rounded-md border border-gray-300 px-4 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+        />
+        <div className="flex ml-4 space-x-2">
           <FaThList
-            className={`cursor-pointer ${
-              view === "list" ? "text-indigo-600" : "text-gray-500"
-            }`}
+            className="cursor-pointer text-xl"
             onClick={() => setView("list")}
           />
           <FaThLarge
-            className={`cursor-pointer ${
-              view === "grid" ? "text-indigo-600" : "text-gray-500"
-            }`}
+            className="cursor-pointer text-xl"
             onClick={() => setView("grid")}
           />
           <FaTh
-            className={`cursor-pointer ${
-              view === "card" ? "text-indigo-600" : "text-gray-500"
-            }`}
+            className="cursor-pointer text-xl"
             onClick={() => setView("card")}
           />
         </div>
       </div>
 
-      <div
-        className={`grid gap-6 ${
-          view === "list"
-            ? "grid-cols-1"
-            : view === "grid"
-            ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
-            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
-        }`}
-      >
-        {paginatedReplies.map((reply) => (
-          <div
-            key={reply.id}
-            className="p-6 border rounded-lg shadow-sm hover:shadow-md transition-shadow bg-white"
-          >
-            <h3 className="text-lg font-bold text-black flex items-center">
-              <FaQuestion className="mr-2 text-blue-500" /> {reply.question}
-            </h3>
-            <p className="mt-2 text-sm text-gray-600 flex items-center">
-              <FaReply className="mr-2 text-green-500" /> {reply.answer}
-            </p>
-            {/* <p className="mt-2 text-sm text-gray-500 flex items-center">
-              <FaRegClock className="mr-2 text-red-500" /> {reply.timestamp}
-            </p> */}
-          </div>
-        ))}
-      </div>
-
-      {filteredReplies.length === 0 && (
-        <p className="text-center text-gray-600 mt-6">No replies found.</p>
+      {view === "list" && <div>{renderMessages()}</div>}
+      {view === "grid" && (
+        <div className="grid grid-cols-2 gap-4">{renderMessages()}</div>
+      )}
+      {view === "card" && (
+        <div className="grid grid-cols-3 gap-4">{renderMessages()}</div>
       )}
 
       <div className="flex justify-between items-center mt-8">
         <button
           onClick={goToPreviousPage}
           disabled={currentPage === 1}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-md text-white ${
-            currentPage === 1
-              ? "bg-gray-300"
-              : "bg-indigo-600 hover:bg-indigo-500"
-          }`}
+          className="px-3 py-1 border rounded"
         >
-          <FaArrowLeft />
-          <span>Previous</span>
+          <FaArrowLeft /> Previous
         </button>
-        <span className="text-gray-700">
+        <span>
           Page {currentPage} of {totalPages}
         </span>
         <button
           onClick={goToNextPage}
           disabled={currentPage === totalPages}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-md text-white ${
-            currentPage === totalPages
-              ? "bg-gray-300"
-              : "bg-indigo-600 hover:bg-indigo-500"
-          }`}
+          className="px-3 py-1 border rounded"
         >
-          <span>Next</span>
-          <FaArrowRight />
+          Next <FaArrowRight />
         </button>
       </div>
     </div>

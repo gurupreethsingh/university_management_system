@@ -5,11 +5,11 @@ const mongoose = require("mongoose");
 const ReplySchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true, // Ensure the name is still required
+    required: true,
   },
   email: {
     type: String,
-    required: false, // Make email not required
+    required: true,
   },
   message: {
     type: String,
