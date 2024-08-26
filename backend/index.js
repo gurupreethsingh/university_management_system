@@ -78,19 +78,6 @@ app.post("/add-contact-message", async (req, res) => {
   }
 });
 
-// Route to get all contact messages (for admin)
-// app.get("/all-messages", async (req, res) => {
-//   try {
-//     const messages = await ContactMessage.find();
-
-//     res.status(200).json(messages);
-//   } catch (error) {
-//     console.error("Error retrieving contact messages:", error);
-//     res.status(500).json({
-//       error: "An error occurred while retrieving the contact messages.",
-//     });
-//   }
-// });
 
 // Route to get all contact messages along with their replies (for admin)
 app.get("/all-messages", async (req, res) => {
@@ -218,7 +205,7 @@ app.post("/admin-login", async (req, res) => {
 
     // Create a JWT token
     const token = jwt.sign(
-      { id: admin._id, email: admin.email, name: admin.name },
+      { id: admin._id, email: admin.email, name: admin.name, role : admin.role },
       "ecoders_jwt_secret",
       { expiresIn: "1h" }
     );
@@ -227,7 +214,7 @@ app.post("/admin-login", async (req, res) => {
     res.json({
       status: true,
       token,
-      admin: { id: admin._id, name: admin.name, email: admin.email },
+      admin: { id: admin._id, name: admin.name, email: admin.email , role : admin.role},
     });
   } catch (err) {
     console.error(err);
@@ -388,31 +375,35 @@ app.post("/student-login", async (req, res) => {
   }
 });
 
-// profile page code.
 
-app.get("/profile", auth, async (req, res) => {
+// fetch admin using id.
+app.get("/admin-profile/:id", async (req, res) => {
   try {
-    let user;
+    // Fetch the admin by ID
+    const admin = await Admin.findById(req.params.id)
+      .populate("assignedCourses")   // Populate assigned courses
+      .populate("managedExams")      // Populate managed exams
+      .populate("managedStudents")   // Populate managed students
+      .populate("managedTeachers")   // Populate managed teachers
+      .populate("blogPosts")         // Populate blog posts
+      .populate("feesModules")       // Populate fees modules
+      .populate("reports");          // Populate reports
 
-    if (req.user.role === "admin") {
-      user = await Admin.findById(req.user.id);
-    } else if (req.user.role === "teacher") {
-      user = await Teacher.findById(req.user.id);
-    } else if (req.user.role === "student") {
-      user = await Student.findById(req.user.id);
+    // Handle the case where the admin is not found
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
     }
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    res.json(user);
+    // Respond with the full admin data
+    res.json(admin);
   } catch (error) {
     console.error(error.message);
     res.status(500).send("Server error");
   }
 });
 
+
+// 
 app.get("/teacher-dashboard/counts", authenticateToken, async (req, res) => {
   try {
     const totalTeachers = await Teacher.countDocuments(); // This gives the total number of teachers

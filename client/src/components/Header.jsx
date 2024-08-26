@@ -1,13 +1,10 @@
-// final header. coding.
+// new header. 
 
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogPanel,
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
   Popover,
   PopoverButton,
   PopoverGroup,
@@ -15,7 +12,6 @@ import {
 } from "@headlessui/react";
 import {
   Bars3Icon,
-  ChartPieIcon,
   XMarkIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
@@ -26,7 +22,7 @@ const products = [
     name: "Analytics",
     description: "Get a better understanding of your traffic",
     href: "#",
-    icon: ChartPieIcon,
+    icon: UserCircleIcon,
   },
   // Add other products here
 ];
@@ -36,12 +32,15 @@ export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  console.log(user);
+  console.log(user);
 
   useEffect(() => {
     const handleStorageChange = () => {
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
         setIsLoggedIn(true);
       } else {
         setUser(null);
@@ -226,41 +225,47 @@ export default function Header() {
           </a>
           {renderLinks()}
         </PopoverGroup>
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-          {isLoggedIn && user && (
-            <Popover className="relative flex items-center gap-x-3">
-              <span className="text-sm font-semibold leading-6 text-gray-900">
-                {user.name}
-              </span>
-              <PopoverButton className="flex items-center gap-x-1 text-sm font-semibold leading-6 text-gray-900">
-                <UserCircleIcon
-                  aria-hidden="true"
-                  className="h-8 w-8 text-gray-400"
-                />
-              </PopoverButton>
 
-              <PopoverPanel
-                transition
-                className="absolute right-0 top-full z-10 mt-3 w-48 overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5 transition data-[closed]:translate-y-1 data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in"
-              >
-                <div className="p-4">
-                  <a
-                    href="/profile"
-                    className="block text-sm font-semibold leading-6 text-gray-900"
-                  >
-                    Profile
-                  </a>
-                  <button
-                    onClick={logout}
-                    className="mt-2 block w-full text-left text-sm font-semibold leading-6 text-gray-900"
-                  >
-                    Logout
-                  </button>
-                </div>
-              </PopoverPanel>
-            </Popover>
+<div className="hidden lg:flex lg:flex-1 lg:justify-end">
+  {isLoggedIn && user && (
+    <Popover className="relative flex items-center gap-x-3">
+      <span className="text-sm font-semibold leading-6 text-gray-900">
+        {user?.name}
+      </span>
+      <Popover.Button className="flex items-center gap-x-1 text-sm font-semibold leading-6 text-gray-900">
+        <UserCircleIcon
+          aria-hidden="true"
+          className="h-8 w-8 text-gray-400"
+        />
+      </Popover.Button>
+
+      <Popover.Panel
+        transition
+        className="absolute right-0 top-full z-10 mt-3 w-48 overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5 transition data-[closed]:translate-y-1 data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in"
+      >
+        <div className="p-4">
+          {user?.role && user?.id && (
+            <a
+              href={`/${user.role}-profile/${user.id}`}
+              className="block text-sm font-semibold leading-6 text-gray-900"
+            >
+              Profile
+            </a>
           )}
+          <button
+            onClick={logout}
+            className="mt-2 block w-full text-left text-sm font-semibold leading-6 text-gray-900"
+          >
+            Logout
+          </button>
         </div>
+      </Popover.Panel>
+    </Popover>
+  )}
+</div>
+
+
+
       </nav>
       <Dialog
         open={mobileMenuOpen}
