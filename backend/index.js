@@ -78,16 +78,17 @@ app.post("/add-contact-message", async (req, res) => {
   }
 });
 
-// Route to get all contact messages (for admin)
+// route to get all the messages.
 app.get("/all-messages", async (req, res) => {
   try {
     const messages = await ContactMessage.find();
-
+    console.log("Fetched Messages:", messages); // Debugging line
     res.status(200).json(messages);
   } catch (error) {
     console.error("Error retrieving contact messages:", error);
     res.status(500).json({
       error: "An error occurred while retrieving the contact messages.",
+      details: error.message, // Providing error details can help in debugging
     });
   }
 });
@@ -103,33 +104,6 @@ app.get("/reply-message/:id", async (req, res) => {
     res
       .status(500)
       .json({ error: "An error occurred while retrieving the message." });
-  }
-});
-
-// Route to add a reply to a message
-app.post("/give-message-reply/:id/reply", async (req, res) => {
-  try {
-    const { name, email, message } = req.body;
-    const newReply = {
-      name,
-      email,
-      message,
-      timestamp: new Date(),
-    };
-
-    const messageDoc = await ContactMessage.findById(req.params.id);
-    if (!messageDoc)
-      return res.status(404).json({ error: "Message not found" });
-
-    messageDoc.replies.push(newReply);
-    await messageDoc.save();
-
-    res.status(200).json({ message: "Reply added successfully!" });
-  } catch (error) {
-    console.error("Error adding reply:", error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while adding the reply." });
   }
 });
 

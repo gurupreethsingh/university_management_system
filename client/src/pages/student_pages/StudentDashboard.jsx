@@ -43,7 +43,22 @@ const StudentDashboard = () => {
   const [unreadNotifications, setUnreadNotifications] = useState(true); // State to indicate unread notifications
 
   useEffect(() => {
-    setUser({ name: "John Doe" });
+    try {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser && storedUser !== "undefined") {
+        const parsedUser = JSON.parse(storedUser);
+        if (parsedUser && typeof parsedUser === "object") {
+          setUser(parsedUser);
+        } else {
+          setError("Invalid user data. Please log in again.");
+        }
+      } else {
+        setError("No user data found. Please log in again.");
+      }
+    } catch (err) {
+      console.error("Failed to parse user data:", err);
+      setError("Failed to load user data. Please log in again.");
+    }
   }, []);
 
   if (error) {

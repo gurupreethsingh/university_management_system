@@ -10,7 +10,8 @@ import {
   FaUserCircle,
 } from "react-icons/fa";
 
-export default function ReplyMessage({ adminName, adminEmail }) { // Pass admin details as props
+export default function ReplyMessage({ adminName }) {
+  // Removed adminEmail from props
   const { id } = useParams();
   const [message, setMessage] = useState(null);
   const [reply, setReply] = useState("");
@@ -20,7 +21,9 @@ export default function ReplyMessage({ adminName, adminEmail }) { // Pass admin 
   useEffect(() => {
     const fetchMessage = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/reply-message/${id}`);
+        const response = await axios.get(
+          `http://localhost:5000/reply-message/${id}`
+        );
         setMessage(response.data);
         setReplies(response.data.replies);
       } catch (error) {
@@ -34,18 +37,19 @@ export default function ReplyMessage({ adminName, adminEmail }) { // Pass admin 
   const handleReply = async () => {
     if (reply.trim() !== "") {
       const newReply = {
-        name: adminName, // Admin's name
-        email: adminEmail, // Admin's email
+        name: adminName, // This should be fetched and stored correctly in your component state
         message: reply,
       };
 
       try {
-        // Send the reply to the backend to store in the database
-        await axios.post(`http://localhost:5000/give-message-reply/${id}/reply`, newReply);
-        
-        // Update the replies list with the new reply
-        setReplies([...replies, { ...newReply, timestamp: new Date().toLocaleString() }]);
-        setReply("");
+        const response = await axios.post(
+          `http://localhost:5000/give-message-reply/${id}/reply`,
+          newReply
+        );
+        if (response.status === 200) {
+          setReplies([newReply, ...replies]);
+          setReply("");
+        }
       } catch (error) {
         console.error("Error sending reply:", error);
       }
@@ -69,12 +73,11 @@ export default function ReplyMessage({ adminName, adminEmail }) { // Pass admin 
         </div>
         <div className="flex items-center mb-4">
           <FaClock className="mr-2 text-green-500" />
-          <span className="text-sm text-gray-500">{new Date(message.createdAt).toLocaleString()}</span>
+          <span className="text-sm text-gray-500">
+            {new Date(message.createdAt).toLocaleString()}
+          </span>
         </div>
-        <p className="text-gray-800 mb-6">
-          <FaCommentDots className="mr-2 text-teal-500" />
-          {message.message_text}
-        </p>
+        <p className="text-gray-800 mb-6">{message.message_text}</p>
       </div>
 
       <div>
@@ -93,7 +96,7 @@ export default function ReplyMessage({ adminName, adminEmail }) { // Pass admin 
               <div className="flex items-center mb-2">
                 <FaUserCircle className="mr-2 text-indigo-600" />
                 <span className="font-semibold text-gray-700">
-                  {reply.name}
+                  {reply.name} ({reply.role})
                 </span>
                 <span className="ml-4 text-sm text-gray-500">
                   <FaClock className="mr-1 text-green-500" />

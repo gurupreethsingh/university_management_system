@@ -29,22 +29,18 @@ export default function MessagesList() {
     const fetchMessages = async () => {
       try {
         const response = await axios.get("http://localhost:5000/all-messages");
-        const fetchedMessages = response.data;
-  
-        console.log(fetchedMessages); // Check the structure of the data here
-  
-        // Sort messages by timestamp, with the latest message first
-        const sortedMessages = fetchedMessages.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-        );
-        
-        setMessages(sortedMessages);
-        setFilteredMessages(sortedMessages); // Initially, all messages are displayed
+        console.log("API Response:", response); // Check raw API response
+        if (response.data) {
+          setMessages(response.data);
+          setFilteredMessages(response.data);
+        } else {
+          console.error("No data received from API");
+        }
       } catch (error) {
         console.error("Error fetching messages:", error);
       }
     };
-  
+
     fetchMessages();
   }, []);
 
@@ -158,11 +154,13 @@ export default function MessagesList() {
                 <FaEnvelope className="mr-2" /> {eachmessage.message_text}
               </h3>
               <p className="mt-2 text-sm text-gray-600 flex items-center">
-                <FaUser className="mr-2 text-blue-500" /> {eachmessage.firstName} {eachmessage.lastName} - (
+                <FaUser className="mr-2 text-blue-500" />{" "}
+                {eachmessage.firstName} {eachmessage.lastName} - (
                 {eachmessage.email})
               </p>
               <p className="mt-2 text-sm text-gray-500 flex items-center">
-                <FaClock className="mr-2 text-green-500" /> {eachmessage.createdAt}
+                <FaClock className="mr-2 text-green-500" />{" "}
+                {eachmessage.createdAt}
               </p>
             </div>
           </Link>
