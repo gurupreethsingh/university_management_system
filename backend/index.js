@@ -14,7 +14,12 @@ const Admin = require("./models/AdminModel"); // Your admin model
 const Teacher = require("./models/TeacherModel");
 const Student = require("./models/StudentModel");
 const Event = require("./models/EventModel");
+const Exam = require("./models/ExamModel");
 const Course = require("./models/CourseModel");
+const Blog = require("./models/BlogModel");
+const Fee = require("./models/FeeModel");
+const FeeModule = require("./models/FeeModule");
+const Report = require("./models/ReportModel");
 const auth = require("./middleware/auth");
 const ObjectId = mongoose.Types.ObjectId;
 const authenticateToken = require("./middleware/authenticateToken");
@@ -35,6 +40,8 @@ app.use(
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.json());
+// Serve static files from the "uploads" directory
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Database connection
 mongoose
@@ -513,6 +520,80 @@ app.get("/teacher-dashboard/teachers", async (req, res) => {
     res.status(500).json({ message: "Server error fetching teachers" });
   }
 });
+
+// update admin details.
+
+// Multer setup for image upload
+const adminPhotoStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadPath = path.join(__dirname, "uploads/admins");
+
+    // Ensure the directory exists
+    fs.exists(uploadPath, (exists) => {
+      if (!exists) {
+        // If the directory doesn't exist, create it
+        fs.mkdir(uploadPath, { recursive: true }, (err) => {
+          if (err) {
+            console.error("Error creating directory:", err);
+            cb(err);
+          } else {
+            cb(null, uploadPath);
+          }
+        });
+      } else {
+        cb(null, uploadPath);
+      }
+    });
+  },
+  filename: function (req, file, cb) {
+    // Naming the file with the current date to avoid filename conflicts
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+const uploadAdminPhoto = multer({ storage: adminPhotoStorage });
+
+// PUT route to update admin details
+app.put(
+  "/admin-profile-update/:id",
+  uploadAdminPhoto.single("adminAvatar"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { name, email, role, country, city, state, phone } = req.body;
+      const updateData = {
+        name,
+        email,
+        role,
+        country,
+        city,
+        state,
+        phone,
+      };
+
+      // If there's a file uploaded, update the adminAvatar path
+      if (req.file) {
+        updateData.adminAvatar = `/uploads/admins/${req.file.filename}`;
+      }
+
+      // Update the admin in the database
+      const updatedAdmin = await Admin.findByIdAndUpdate(id, updateData, {
+        new: true,
+      });
+
+      if (!updatedAdmin) {
+        return res.status(404).send({ message: "Admin not found" });
+      }
+
+      res
+        .status(200)
+        .json({ message: "Admin updated successfully", updatedAdmin });
+    } catch (error) {
+      console.error("Error updating admin:", error);
+      res.status(500).json({ message: "Server error while updating admin" });
+    }
+  }
+);
 
 const PORT = 5000;
 // Start the server

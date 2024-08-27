@@ -9,6 +9,10 @@ const adminSchema = new mongoose.Schema({
     default: "admin",
     enum: ["admin", "teacher", "student", "hr", "blogger"],
   },
+  phone: { type: String },
+  country: { type: String },
+  city: { type: String },
+  state: { type: String },
   adminAvatar: { type: String }, // Path to the avatar image
   coverImage: { type: String }, // Path to the cover image
   createdDate: { type: Date, default: Date.now },

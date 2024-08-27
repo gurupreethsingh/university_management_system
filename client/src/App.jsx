@@ -29,6 +29,7 @@ import AllBlogs from "./pages/blog_pages/AllBlogs";
 import AdminResetPassword from "./pages/admin_pages/AdminResetPassword";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminProfile from "./pages/admin_pages/AdminProfile";
+import AdminProfileUpdate from "./pages/admin_pages/AdminProfileUpdate";
 
 const App = () => (
   <Router>
@@ -73,11 +74,20 @@ const App = () => (
         }
       />
 
-<Route
+      <Route
         path="/admin-profile/:id"
         element={
           <ProtectedRoute>
             <AdminProfile />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin-profile-update/:id"
+        element={
+          <ProtectedRoute>
+            <AdminProfileUpdate />
           </ProtectedRoute>
         }
       />
